@@ -1,0 +1,15 @@
+[tool.black]
+line-length = 119
+target-version = ['py36']
+include = '\.pyi?$'
+exclude = '''
+(
+  /(
+      \.eggs
+    | \.git
+    | venv
+    | frontend
+  )/
+  | settings.py
+)
+'''
