@@ -1,6 +1,2 @@
 Pillow==6.2.1
-numpy==1.7.4
-
-# for development
-black
-isort
+numpy==1.17.4

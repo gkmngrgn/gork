@@ -1,6 +1,6 @@
 import argparse
 
-from effect import ImageEffect
+from gork.effect import ImageEffect
 
 
 class ImageGenerator(object):

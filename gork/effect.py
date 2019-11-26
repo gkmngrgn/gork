@@ -2,7 +2,7 @@ import operator
 import sys
 from collections import defaultdict
 
-from palette import SENSITIVITY, SIZE, get_flat_palette
+from gork.palette import SENSITIVITY, SIZE, get_flat_palette
 
 import numpy as np
 from PIL import Image
