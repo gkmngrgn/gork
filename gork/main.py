@@ -14,8 +14,8 @@ class ImageGenerator(object):
 
     def run(self):
         args = self.parse_args()
-        # effect = ImageEffect(src=args.src)
-        # effect.out_image.save(args.dst.name)
+        effect = ImageEffect(src=args.src)
+        effect.out_image.save(args.dst.name)
 
         terminal = Terminal(src=args.src)
         terminal.print_image()
