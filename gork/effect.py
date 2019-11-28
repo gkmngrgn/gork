@@ -1,5 +1,7 @@
+import io
 import operator
 import sys
+import typing
 from collections import defaultdict
 
 from gork.palette import SENSITIVITY, SIZE, get_flat_palette
@@ -9,7 +11,7 @@ from PIL import Image
 
 
 class ImageEffect(object):
-    def __init__(self, src):
+    def __init__(self, src: io.BufferedReader) -> None:
         palette_img = Image.new("P", (1, 1), 0)
         palette_img.putpalette(get_flat_palette())
 
@@ -27,7 +29,7 @@ class ImageEffect(object):
 
         for x in range(SIZE[0]):
             for y in range(SIZE[1]):
-                histogram = defaultdict(int)
+                histogram: typing.Dict[int, int] = defaultdict(int)
                 for x2 in range(x * SENSITIVITY, (x + 1) * SENSITIVITY):
                     for y2 in range(y * SENSITIVITY, (y + 1) * SENSITIVITY):
                         histogram[input.getpixel((x2, y2))] += 1

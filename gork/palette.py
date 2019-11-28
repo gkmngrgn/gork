@@ -1,3 +1,4 @@
+import typing
 from functools import reduce
 
 # TODO: find an algorithm to generate a color spectrum.
@@ -264,10 +265,7 @@ SIZE = (150, 150)
 SENSITIVITY = 10
 
 
-def get_flat_palette():
-    """
-    Rule 1: palette should contain exactly 256 colors.
-    """
+def get_flat_palette() -> typing.Tuple[int, ...]:
     palette = PALETTE[:255]
     for _ in range(256 - len(palette)):
         palette.append((0, 0, 0))

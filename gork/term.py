@@ -1,3 +1,6 @@
+import io
+import typing
+
 from gork.palette import PALETTE
 
 import cv2
@@ -10,32 +13,32 @@ ANSI_RES = "\x1b[0m"
 
 
 class Terminal(object):
-    def __init__(self, src):
+    def __init__(self, src: io.BufferedReader) -> None:
         self.src = src
-        self.spectrum = {}
+        self.spectrum: typing.Dict[typing.Tuple[int, ...], str] = {}
         self.palette = np.empty((2 ** 8, 3), dtype=np.int64)
         for index, color in enumerate(PALETTE):
             self.palette[index] = color[::-1]
         self.width = 78
 
     @staticmethod
-    def get_ansi_color_code(foreground, background=None):
+    def get_ansi_color_code(foreground: str, background: str = "") -> str:
         background = background or foreground
         code_block = [ANSI_ESC, ANSI_CLR.format(fg=foreground, bg=background), ANSI_CHR]
         return "".join(code_block)
 
-    def get_size(self, image):
+    def get_size(self, image: np.ndarray) -> typing.Tuple[int, int]:
         img_width, img_height, *_ = image.shape
         return self.width, int(img_width * self.width / img_height)
 
-    def get_color(self, pixel):
-        pixel_tuple = tuple(pixel)  # why?
+    def get_color(self, pixel: np.array) -> str:
+        pixel_tuple = tuple(pixel)
         if pixel_tuple not in self.spectrum:
             dists = self.dists(self.palette, pixel)
             self.spectrum[pixel_tuple] = str(np.argmin(dists))
         return self.spectrum[pixel_tuple]
 
-    def dists(self, col_map, pixel):
+    def dists(self, col_map: np.ndarray, pixel: np.ndarray) -> np.ndarray:
         dists = np.empty(col_map.shape[0], dtype=np.double)
         for i in range(col_map.shape[0]):
             r = (col_map[i][0] + pixel[0]) / 2
@@ -45,7 +48,7 @@ class Terminal(object):
             dists[i] = np.sqrt(2 * dr + 4 * dg + 3 * db + ((r * (dr - db)) / 256))
         return dists
 
-    def print_image(self):
+    def print_image(self) -> None:
         image = cv2.imread(self.src.name)
         width, height = self.get_size(image)
         image = cv2.resize(src=image, dsize=(width, height))
@@ -62,7 +65,7 @@ class Terminal(object):
                 print(self.get_ansi_color_code(top_col, bot_col), sep="", end=ANSI_RES, flush=True)
             print()
 
-    def print_palette(self):
+    def print_palette(self) -> None:
         print("\nColors of the image")
 
         counter = 0
