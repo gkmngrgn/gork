@@ -2,9 +2,10 @@ import io
 import typing
 
 from gork.palette import PALETTE
+from gork.image import GorkImage
 
-import cv2
 import numpy as np
+from PIL import Image
 
 ANSI_ESC = "\x1B["
 ANSI_CLR = "38;5;{fg};48;5;{bg}"
@@ -27,10 +28,6 @@ class Terminal(object):
         code_block = [ANSI_ESC, ANSI_CLR.format(fg=foreground, bg=background), ANSI_CHR]
         return "".join(code_block)
 
-    def get_size(self, image: np.ndarray) -> typing.Tuple[int, int]:
-        img_width, img_height, *_ = image.shape
-        return self.width, int(img_width * self.width / img_height)
-
     def get_color(self, pixel: np.array) -> str:
         pixel_tuple = tuple(pixel)
         if pixel_tuple not in self.spectrum:
@@ -49,10 +46,13 @@ class Terminal(object):
         return dists
 
     def print_image(self) -> None:
-        image = cv2.imread(self.src.name)
-        width, height = self.get_size(image)
-        image = cv2.resize(src=image, dsize=(width, height))
-        input_img = image.astype(np.int64)
+        image = GorkImage(image_path=self.src.name)
+        image.resize(width=self.width)
+        width, height = image.get_size()
+
+        import ipdb; ipdb.set_trace()
+
+        # input_img = image.astype(np.int64)
 
         print()
         for y in range(height // 2):
@@ -75,6 +75,6 @@ class Terminal(object):
 
             if counter >= self.width / 2:
                 counter = 0
-                print("\n\n")
+                print("\n")
 
         print("\n")

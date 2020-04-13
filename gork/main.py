@@ -22,6 +22,10 @@ class ImageGenerator(object):
         terminal.print_palette()
 
 
-if __name__ == "__main__":
+def run_cli():
     image_generator = ImageGenerator()
     image_generator.run()
+
+
+if __name__ == "__main__":
+    run_cli()

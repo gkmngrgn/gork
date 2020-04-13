@@ -1,5 +1,0 @@
--r requirements.txt
-
-mypy==0.740
-black==19.10b0
-isort==4.3.21
