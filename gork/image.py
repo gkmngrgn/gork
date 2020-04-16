@@ -1,23 +1,22 @@
 import operator
 import sys
-
+import typing
 from collections import defaultdict
 
-import typing
-
-from gork.palette import PALETTE, SENSITIVITY, SIZE, get_flat_palette
+from gork.palette import SENSITIVITY, get_flat_palette, get_palette
 
 import numpy as np
-from PIL import Image, ImageOps
+from PIL import Image
 
 
 class GorkImage:
-    def __init__(self, image_path: str) -> None:
-        self.image = Image.open(image_path)
+    def __init__(self, image_path: str, width: int) -> None:
         self.spectrum: typing.Dict[typing.Tuple[int, ...], str] = {}
-        self.palette = np.empty((2 ** 8, 3), dtype=np.int64)
-        for index, color in enumerate(PALETTE):
-            self.palette[index] = color[::-1]
+        self.palette = get_palette()
+        self.image = Image.open(image_path)
+        self.src_width, self.src_height = self.image.size
+        self.dst_width, self.dst_height = width, int(width / self.image.width * self.image.height)
+        self.image = self.image.resize(size=(self.dst_width, self.dst_height), resample=Image.BOX)
 
     def dists(self, pixel: np.ndarray) -> np.ndarray:
         dists = np.empty(self.palette.shape[0], dtype=np.double)
@@ -33,21 +32,17 @@ class GorkImage:
         palette_img = Image.new("P", (1, 1), 0)
         palette_img.putpalette(get_flat_palette())
 
-        if self.image.mode not in ["RGB", "L"]:
-            image = self.image.convert("RGB")
-        self.img_size = self.image.size
+        # if self.image.mode not in ["RGB", "L"]:
+        #     image = self.image.convert("RGB")
 
-        image = (
-            self.image.resize((SIZE[0] * SENSITIVITY, SIZE[1] * SENSITIVITY), Image.BICUBIC)
-            .quantize(palette=palette_img)
-            .convert("RGB")
-        )
+        image_size = (self.dst_width * SENSITIVITY, self.dst_height * SENSITIVITY)
+        image = self.image.resize(size=image_size, resample=Image.BICUBIC).quantize(palette=palette_img).convert("RGB")
 
-        self.out_image = Image.new("RGB", SIZE)
-        self.out_data = np.empty([SIZE[0], SIZE[1], 3])
+        out_image = Image.new("RGB", size=(self.dst_width, self.dst_height))
+        out_data = np.empty([self.dst_width, self.dst_height, 3])
 
-        for x in range(SIZE[0]):
-            for y in range(SIZE[1]):
+        for x in range(self.dst_width):
+            for y in range(self.dst_height):
                 histogram: typing.Dict[int, int] = defaultdict(int)
                 for x2 in range(x * SENSITIVITY, (x + 1) * SENSITIVITY):
                     for y2 in range(y * SENSITIVITY, (y + 1) * SENSITIVITY):
@@ -56,11 +51,11 @@ class GorkImage:
                     color = max(histogram.items(), key=operator.itemgetter(1))[0]
                 elif sys.version_info[0] == 2:
                     color = max(histogram.iteritems(), key=operator.itemgetter(1))[0]
-                self.out_data[x, y] = color
-                self.out_image.putpixel((x, y), color)
+                out_data[x, y] = color
+                out_image.putpixel((x, y), color)
 
-        # self.out_image = self.out_image.resize(self.img_size)
-        self.out_image.save(output)
+        out_image = out_image.resize(size=(self.src_width, self.src_height), resample=Image.BOX)
+        out_image.save(output)
 
     def get_pixel_color(self, x: int, y: int) -> str:
         pixel = self.image.getpixel(xy=(x, y))
@@ -69,12 +64,5 @@ class GorkImage:
             self.spectrum[pixel] = str(np.argmin(dists))
         return self.spectrum[pixel]
 
-    def get_size(self) -> typing.Tuple[int, int]:
-        return self.image.width, self.image.height
-
-    def get_spectrum(self) -> ...:  # TODO
+    def get_spectrum(self) -> typing.Tuple[int, ...]:
         return sorted(set(self.spectrum.values()))
-
-    def resize(self, width: int) -> None:
-        height = int(self.image.width * width / self.image.height)
-        self.image = ImageOps.fit(self.image, size=(width, height))

@@ -29,30 +29,29 @@ class ImageGenerator:
         )
         return parser.parse_args()
 
-    def print_image(self, image: GorkImage, palette: bool = False) -> None:
-        width, height = image.get_size()
-
+    def print_image(self, image: GorkImage) -> None:
         print()
 
-        for y in range(height // 2):
+        for y in range(image.dst_height // 2):
             y2 = 2 * y
 
-            for x in range(width):
+            for x in range(image.dst_width):
                 top_color = image.get_pixel_color(x=x, y=y2)
                 bottom_color = image.get_pixel_color(x, y=y2 + 1)
                 print(self.get_ansi_color_code(top_color, bottom_color), sep="", end=ANSI_RES, flush=True)
 
             print()
 
-    def print_palette(self, image: GorkImage, width: int) -> None:
+    def print_palette(self, image: GorkImage) -> None:
         print("\nColors of the image")
 
         counter = 0
+
         for color_code in image.get_spectrum():
             print(self.get_ansi_color_code(color_code), sep="", end=f"{ANSI_RES} ")
             counter += 1
 
-            if counter >= width / 2:
+            if counter >= image.dst_width / 2:
                 counter = 0
                 print("\n")
 
@@ -60,17 +59,15 @@ class ImageGenerator:
 
     def run(self) -> None:
         args = self.parse_args()
-        image = GorkImage(image_path=args.src.name)
-
-        if args.output:
-            image.export(output=args.output.name)
-
-        image.resize(width=args.width)
+        image = GorkImage(image_path=args.src.name, width=args.width)
 
         self.print_image(image=image)
 
         if args.palette is True:
-            self.print_palette(image=image, width=args.width)
+            self.print_palette(image=image)
+
+        if args.output:
+            image.export(output=args.output.name)
 
 
 def run_cli() -> None:

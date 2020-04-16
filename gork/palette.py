@@ -1,6 +1,8 @@
 import typing
 from functools import reduce
 
+import numpy as np
+
 # TODO: find an algorithm to generate a color spectrum.
 PALETTE = [
     (0, 0, 0),
@@ -261,8 +263,14 @@ PALETTE = [
     (238, 238, 238),
 ]
 
-SIZE = (150, 150)
 SENSITIVITY = 10
+
+
+def get_palette() -> np.ndarray:
+    palette = np.empty((2 ** 8, 3), dtype=np.int64)
+    for index, color in enumerate(PALETTE):
+        palette[index] = color[::-1]
+    return palette
 
 
 def get_flat_palette() -> typing.Tuple[int, ...]:
