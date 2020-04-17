@@ -264,6 +264,8 @@ PALETTE = [
 ]
 
 SENSITIVITY = 10
+CUBELEVELS = [0x00, 0x5f, 0x87, 0xaf, 0xd7, 0xff]
+SNAPS = [(x + y) / 2 for x, y in zip(CUBELEVELS, [0] + CUBELEVELS)][1:]
 
 
 def get_palette() -> np.ndarray:

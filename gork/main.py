@@ -1,6 +1,6 @@
 import argparse
 
-from gork.image import GorkImage
+from gork.image import GorkImage, RGB
 
 ANSI_ESC = "\x1B["
 ANSI_CLR = "38;5;{fg};48;5;{bg}"
@@ -10,9 +10,12 @@ ANSI_RES = "\x1b[0m"
 
 class ImageGenerator:
     @staticmethod
-    def get_ansi_color_code(foreground: str, background: str = "") -> str:
+    def get_ansi_color_code(foreground: RGB, background: RGB = None) -> str:
+        def ccode(rgb: RGB) -> int:
+            return rgb.red * 36 + rgb.green * 6 + rgb.blue + 16
+
         background = background or foreground
-        code_block = [ANSI_ESC, ANSI_CLR.format(fg=foreground, bg=background), ANSI_CHR]
+        code_block = [ANSI_ESC, ANSI_CLR.format(fg=ccode(foreground), bg=ccode(background)), ANSI_CHR]
         return "".join(code_block)
 
     def parse_args(self) -> argparse.Namespace:
@@ -36,8 +39,8 @@ class ImageGenerator:
             y2 = 2 * y
 
             for x in range(image.dst_width):
-                top_color = image.get_pixel_color(x=x, y=y2)
-                bottom_color = image.get_pixel_color(x, y=y2 + 1)
+                top_color = image.get_color(x=x, y=y2)
+                bottom_color = image.get_color(x, y=y2 + 1)
                 print(self.get_ansi_color_code(top_color, bottom_color), sep="", end=ANSI_RES, flush=True)
 
             print()
@@ -47,8 +50,8 @@ class ImageGenerator:
 
         counter = 0
 
-        for color_code in image.get_spectrum():
-            print(self.get_ansi_color_code(color_code), sep="", end=f"{ANSI_RES} ")
+        for rgb in image.get_spectrum():
+            print(self.get_ansi_color_code(rgb), sep="", end=f"{ANSI_RES} ")
             counter += 1
 
             if counter >= image.dst_width / 2:
