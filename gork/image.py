@@ -3,27 +3,9 @@ import sys
 import typing
 from collections import defaultdict
 
-from gork.palette import SENSITIVITY, SNAPS, get_flat_palette, get_palette
-
-import numpy as np
+from gork.palette import SENSITIVITY, get_flat_palette, get_palette
+from gork.structs import RGB
 from PIL import Image
-
-
-class RGB:
-    def __init__(self, red: int, green: int, blue: int) -> None:
-        self.red = red
-        self.green = green
-        self.blue = blue
-
-    def __repr__(self) -> str:
-        return f"({self.red}, {self.green}, {self.blue})"
-
-    def __gt__(self, other) -> bool:
-        return self.red > other.red and self.green > other.green and self.blue > other.blue
-
-    @property
-    def as_tuple(self):
-        return (self.red, self.green, self.blue)
 
 
 class GorkImage:

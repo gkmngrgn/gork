@@ -2,20 +2,7 @@ import typing
 from functools import reduce
 
 import numpy as np
-
-
-class Color:
-    """
-    An object for keeping Xterm color data. We will need color names for the accessibility.
-    """
-
-    def __init__(self, hex_code: str, name: str) -> None:
-        self.hex_code = hex_code
-
-    @property
-    def as_rgb(self) -> typing.Tuple[int, int, int]:
-        h = self.hex_code.lstrip("#")
-        return tuple(int(h[i : i + 2], 16) for i in (0, 2, 4))
+from gork.structs import RGB, Color
 
 
 SENSITIVITY = 10
