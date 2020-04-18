@@ -1,6 +1,6 @@
 import argparse
 
-from gork.image import GorkImage, RGB
+from gork.image import RGB, GorkImage
 
 ANSI_ESC = "\x1B["
 ANSI_CLR = "38;5;{fg};48;5;{bg}"
@@ -12,7 +12,14 @@ class ImageGenerator:
     @staticmethod
     def get_ansi_color_code(foreground: RGB, background: RGB = None) -> str:
         def ccode(rgb: RGB) -> int:
-            return rgb.red * 36 + rgb.green * 6 + rgb.blue + 16
+            if rgb.red == rgb.green or rgb.green == rgb.blue:
+                if rgb.red < 8:
+                    return 16
+                if rgb.red > 248:
+                    return 231
+                return round(((rgb.red - 8) / 247) * 24 + 232)
+            ansi = 16 + (36 * rgb.red / 255 * 5) + (6 * rgb.green / 255 * 5) + (rgb.blue / 255 * 5)
+            return round(ansi)
 
         background = background or foreground
         code_block = [ANSI_ESC, ANSI_CLR.format(fg=ccode(foreground), bg=ccode(background)), ANSI_CHR]

@@ -57,17 +57,18 @@ class GorkImage:
                     for y2 in range(y * SENSITIVITY, (y + 1) * SENSITIVITY):
                         histogram[image.getpixel((x2, y2))] += 1
                 if sys.version_info[0] == 3:
-                    color = max(histogram.items(), key=operator.itemgetter(1))[0]
+                    pixel = max(histogram.items(), key=operator.itemgetter(1))[0]
                 elif sys.version_info[0] == 2:
-                    color = max(histogram.iteritems(), key=operator.itemgetter(1))[0]
-                image_output.putpixel((x, y), color)
+                    pixel = max(histogram.iteritems(), key=operator.itemgetter(1))[0]
+
+                image_output.putpixel((x, y), pixel)
 
         return image_output
 
     def get_color(self, x: int, y: int) -> RGB:
         pixel = self.image.getpixel(xy=(x, y))
         if pixel not in self.spectrum:
-            self.spectrum[pixel] = RGB(*map(lambda x: len(tuple(s for s in SNAPS if s < x)), pixel))
+            self.spectrum[pixel] = RGB(*pixel)
         return self.spectrum[pixel]
 
     def get_spectrum(self) -> typing.List[RGB]:
