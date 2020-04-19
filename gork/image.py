@@ -1,17 +1,17 @@
 import operator
-import sys
 import typing
 from collections import defaultdict
 
-from gork.palette import SENSITIVITY, get_flat_palette, get_palette
+from gork.palette import SENSITIVITY, get_flat_palette
 from gork.structs import RGB
+from gork.utils import get_all_positions, get_nearest_color
+
 from PIL import Image
 
 
 class GorkImage:
     def __init__(self, image_path: str, width: int) -> None:
         self.spectrum: typing.Dict[typing.Tuple[int, ...], RGB] = {}
-        self.palette = get_palette()
         self.image = Image.open(image_path)
         self.src_width, self.src_height = self.image.size
         self.dst_width, self.dst_height = width, int(width / self.image.width * self.image.height)
@@ -29,21 +29,24 @@ class GorkImage:
         #     image = self.image.convert("RGB")
 
         image_size = (self.dst_width * SENSITIVITY, self.dst_height * SENSITIVITY)
-        image = self.image.resize(size=image_size, resample=Image.BOX).quantize(palette=palette).convert("RGB")
+        image = self.image.resize(size=image_size).quantize(palette=palette).convert("RGB")
         image_output = Image.new("RGB", size=(self.dst_width, self.dst_height))
 
-        for x in range(self.dst_width):
-            for y in range(self.dst_height):
-                histogram: typing.Dict[int, int] = defaultdict(int)
-                for x2 in range(x * SENSITIVITY, (x + 1) * SENSITIVITY):
-                    for y2 in range(y * SENSITIVITY, (y + 1) * SENSITIVITY):
-                        histogram[image.getpixel((x2, y2))] += 1
-                if sys.version_info[0] == 3:
-                    pixel = max(histogram.items(), key=operator.itemgetter(1))[0]
-                elif sys.version_info[0] == 2:
-                    pixel = max(histogram.iteritems(), key=operator.itemgetter(1))[0]
+        for pos_x, pos_y in get_all_positions(x_start=0, x_end=self.dst_width, y_start=0, y_end=self.dst_height):
+            histogram: typing.Dict[int, int] = defaultdict(int)
 
-                image_output.putpixel((x, y), pixel)
+            for pos_x2, pos_y2 in get_all_positions(
+                x_start=pos_x * SENSITIVITY,
+                x_end=(pos_x + 1) * SENSITIVITY,
+                y_start=pos_y * SENSITIVITY,
+                y_end=(pos_y + 1) * SENSITIVITY,
+            ):
+                rgb = RGB(*image.getpixel((pos_x2, pos_y2)))
+                histogram[rgb] += 1
+
+            rgb = max(histogram.items(), key=operator.itemgetter(1))[0]
+            color = get_nearest_color(rgb)
+            image_output.putpixel((pos_x, pos_y), color.as_tuple)
 
         return image_output
 

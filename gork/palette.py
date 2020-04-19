@@ -1,8 +1,7 @@
 import typing
 from functools import reduce
 
-import numpy as np
-from gork.structs import RGB, Color
+from gork.structs import Color
 
 
 SENSITIVITY = 10
@@ -264,38 +263,11 @@ COLORS = [
     Color("#e4e4e4", name="Grey89"),
     Color("#eeeeee", name="Grey93"),
 ]
-PALETTE = [c.as_rgb for c in COLORS]
-
-
-def get_palette() -> np.ndarray:
-    palette = np.empty((2 ** 8, 3), dtype=np.int64)
-    for index, color in enumerate(PALETTE):
-        palette[index] = color[::-1]
-    return palette
+PALETTE = [c.as_rgb.as_tuple for c in COLORS]
 
 
 def get_flat_palette() -> typing.Tuple[int, ...]:
-    palette = PALETTE
+    palette = PALETTE.copy()
     for _ in range(256 - len(palette)):
         palette.append((0, 0, 0))
     return reduce(lambda a, b: a + b, palette)
-
-
-def get_nearest_color(rgb: RGB) -> Color:
-    """
-    We find the nearest color calculating the Euclidian distance. But here, there's a bit different implementation:
-    https://www.compuphase.com/cmetric.htm
-    """
-
-    # TODO: need to write a unit test.
-    distances = []
-
-    for color in palette:
-        mean = (rgb.red + color.red) / 2
-        dist_red = rgb.red - color.red
-        dist_green = rgb.green - color.green
-        dist_blue = rgb.blue - color.blue
-        distance = ((512 + mean) * dist_red ** 2 >> 8) ** 2 + 4 * dist_green ** 2 + (767 - mean * dist_blue ** 2) >> 8
-        distances.append(distance)
-
-    return palette.index(distances.index(min(distances[0])))
