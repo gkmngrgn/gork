@@ -1,5 +1,4 @@
 import typing
-from functools import reduce
 
 from gork.structs import Color
 
@@ -264,10 +263,3 @@ COLORS = [
     Color("#eeeeee", name="Grey93"),
 ]
 PALETTE = [c.as_rgb.as_tuple for c in COLORS]
-
-
-def get_flat_palette() -> typing.Tuple[int, ...]:
-    palette = PALETTE.copy()
-    for _ in range(256 - len(palette)):
-        palette.append((0, 0, 0))
-    return reduce(lambda a, b: a + b, palette)

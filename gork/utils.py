@@ -1,7 +1,7 @@
 import math
 import typing
 
-from gork.palette import COLORS
+from gork.palette import COLORS, PALETTE
 from gork.structs import RGB, Color
 
 
@@ -14,11 +14,10 @@ def get_all_positions(
 
 
 def get_nearest_color(rgb: RGB) -> Color:
-    """
-    We find the nearest color calculating the Euclidian distance. But here, there's a bit different implementation:
-    https://www.compuphase.com/cmetric.htm
-    """
     def distance(c1, c2):
+        if c1 == c2:
+            return 0
+
         (r1, g1, b1) = c1.as_tuple
         (r2, g2, b2) = c2.as_tuple
         return math.sqrt((r1 - r2) ** 2 + (g1 - g2) ** 2 + (b1 - b2) ** 2)

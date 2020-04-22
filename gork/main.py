@@ -1,6 +1,7 @@
 import argparse
 
-from gork.image import RGB, GorkImage
+from gork.image import GorkImage
+from gork.structs import RGB
 from gork.palette import PALETTE
 
 ANSI_ESC = "\x1B["

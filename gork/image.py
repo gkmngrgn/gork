@@ -2,7 +2,8 @@ import operator
 import typing
 from collections import defaultdict
 
-from gork.palette import SENSITIVITY, get_flat_palette
+from functools import reduce
+from gork.palette import SENSITIVITY, PALETTE
 from gork.structs import RGB
 from gork.utils import get_all_positions, get_nearest_color
 
@@ -22,14 +23,14 @@ class GorkImage:
         image.save(output)
 
     def generate_pixelated_image(self) -> Image:
-        palette = Image.new("P", (1, 1), 0)
-        palette.putpalette(get_flat_palette())
+        palette = Image.new("P", size=(16, 16), color=0)
+        palette.putpalette(reduce(lambda a, b: a + b, PALETTE))
 
         # if self.image.mode not in ["RGB", "L"]:
         #     image = self.image.convert("RGB")
 
         image_size = (self.dst_width * SENSITIVITY, self.dst_height * SENSITIVITY)
-        image = self.image.resize(size=image_size).quantize(palette=palette).convert("RGB")
+        image = self.image.resize(size=image_size).convert("RGB")
         image_output = Image.new("RGB", size=(self.dst_width, self.dst_height))
 
         for pos_x, pos_y in get_all_positions(x_start=0, x_end=self.dst_width, y_start=0, y_end=self.dst_height):
