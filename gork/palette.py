@@ -1,9 +1,5 @@
-import typing
-
 from gork.structs import Color
 
-
-SENSITIVITY = 10
 COLORS = [
     Color("#000000", name="Black"),
     Color("#800000", name="Maroon"),
@@ -263,3 +259,4 @@ COLORS = [
     Color("#eeeeee", name="Grey93"),
 ]
 PALETTE = [c.as_rgb.as_tuple for c in COLORS]
+SENSITIVITY = 10

@@ -1,4 +1,8 @@
+from __future__ import annotations
+
 import typing
+
+RGBType = typing.Tuple[int, int, int]
 
 
 class RGB:
@@ -10,11 +14,11 @@ class RGB:
     def __repr__(self) -> str:
         return f"rgb({self.red}, {self.green}, {self.blue})"
 
-    def __gt__(self, other) -> bool:
+    def __gt__(self, other: RGB) -> bool:
         return self.red > other.red and self.green > other.green and self.blue > other.blue
 
     @property
-    def as_tuple(self) -> typing.Tuple[int, int, int]:
+    def as_tuple(self) -> RGBType:
         return (self.red, self.green, self.blue)
 
 

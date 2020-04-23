@@ -1,8 +1,8 @@
 import argparse
 
 from gork.image import GorkImage
-from gork.structs import RGB
 from gork.palette import PALETTE
+from gork.structs import RGB
 
 ANSI_ESC = "\x1B["
 ANSI_CLR = "38;5;{fg};48;5;{bg}"
@@ -12,7 +12,7 @@ ANSI_RES = "\x1b[0m"
 
 class ImageGenerator:
     @staticmethod
-    def get_ansi_color_code(foreground: RGB, background: RGB = None) -> str:
+    def get_ansi_color_code(foreground: RGB, background: RGB) -> str:
         def ccode(rgb: RGB) -> int:
             return PALETTE.index(rgb.as_tuple)
 
@@ -53,7 +53,7 @@ class ImageGenerator:
         counter = 0
 
         for rgb in image.get_spectrum():
-            print(self.get_ansi_color_code(rgb), sep="", end=f"{ANSI_RES} ")
+            print(self.get_ansi_color_code(rgb, rgb), sep="", end=f"{ANSI_RES} ")
             counter += 1
 
             if counter >= image.dst_width / 2:
