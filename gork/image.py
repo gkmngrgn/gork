@@ -1,11 +1,10 @@
-import functools
+import collections
 import operator
 import typing
-from collections import defaultdict
 
-from gork.palette import PALETTE, SENSITIVITY
-from gork.structs import RGB
-from gork.utils import get_all_positions, get_nearest_color
+from gork.palette import SENSITIVITY
+from gork.structs import RGB, RGBType, PositionType
+from gork.utils import get_all_positions, get_color_histogram, get_nearest_color
 
 from PIL import Image
 
@@ -23,31 +22,23 @@ class GorkImage:
         image.save(output)
 
     def generate_pixelated_image(self) -> Image:
-        palette = Image.new("P", size=(16, 16), color=0)
-        palette.putpalette(functools.reduce(operator.add, PALETTE))
-
         # if self.image.mode not in ["RGB", "L"]:
         #     image = self.image.convert("RGB")
 
         image_size = (self.dst_width * SENSITIVITY, self.dst_height * SENSITIVITY)
         image = self.image.resize(size=image_size).convert("RGB")
         image_output = Image.new("RGB", size=(self.dst_width, self.dst_height))
+        palette: typing.Dict[RGBType, typing.List[PositionType]] = collections.defaultdict(list)
 
         for pos_x, pos_y in get_all_positions(x_start=0, x_end=self.dst_width, y_start=0, y_end=self.dst_height):
-            histogram: typing.Dict[RGB, int] = defaultdict(int)
+            histogram = get_color_histogram(image, pos_x, pos_y)
+            rgb_value = max(histogram.items(), key=operator.itemgetter(1))[0]
+            palette[rgb_value].append((pos_x, pos_y))
 
-            for pos_x2, pos_y2 in get_all_positions(
-                x_start=pos_x * SENSITIVITY,
-                x_end=(pos_x + 1) * SENSITIVITY,
-                y_start=pos_y * SENSITIVITY,
-                y_end=(pos_y + 1) * SENSITIVITY,
-            ):
-                rgb = RGB(*image.getpixel((pos_x2, pos_y2)))
-                histogram[rgb] += 1
-
-            rgb = max(histogram.items(), key=operator.itemgetter(1))[0]
-            color = get_nearest_color(rgb)
-            image_output.putpixel((pos_x, pos_y), color.as_tuple)
+        for pixel, positions in palette.items():
+            nearest_color = get_nearest_color(RGB(*pixel))
+            for position in positions:
+                image_output.putpixel(position, nearest_color.as_tuple)
 
         return image_output
 

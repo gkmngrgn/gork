@@ -3,6 +3,7 @@ from __future__ import annotations
 import typing
 
 RGBType = typing.Tuple[int, int, int]
+PositionType = typing.Tuple[int, int]
 
 
 class RGB:
