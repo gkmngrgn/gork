@@ -1,7 +1,7 @@
 import argparse
 
 from gork.image import GorkImage
-from gork.palette import PALETTE
+from gork.palette import DEFAULT_WIDTH, PALETTE
 from gork.structs import RGB
 
 ANSI_ESC = "\x1B["
@@ -30,7 +30,12 @@ class ImageGenerator:
             "-p", "--show-palette", dest="palette", action="store_true", help="print color palette of image"
         )
         parser.add_argument(
-            "-w", "--width", dest="width", type=int, default=78, help="set width of the image as character length"
+            "-w",
+            "--width",
+            dest="width",
+            type=int,
+            default=DEFAULT_WIDTH,
+            help="set width of the image as character length",
         )
         return parser.parse_args()
 
@@ -78,7 +83,3 @@ class ImageGenerator:
 def run_cli() -> None:
     image_generator = ImageGenerator()
     image_generator.run()
-
-
-if __name__ == "__main__":
-    run_cli()

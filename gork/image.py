@@ -3,10 +3,10 @@ import operator
 import typing
 
 from gork.palette import SENSITIVITY
-from gork.structs import RGB, RGBType, PositionType
+from gork.structs import RGB, PositionType, RGBType
 from gork.utils import get_all_positions, get_color_histogram, get_nearest_color
-
 from PIL import Image
+from tqdm import tqdm
 
 
 class GorkImage:
@@ -29,13 +29,18 @@ class GorkImage:
         image = self.image.resize(size=image_size).convert("RGB")
         image_output = Image.new("RGB", size=(self.dst_width, self.dst_height))
         palette: typing.Dict[RGBType, typing.List[PositionType]] = collections.defaultdict(list)
+        all_positions = get_all_positions(x_start=0, x_end=self.dst_width, y_start=0, y_end=self.dst_height)
 
-        for pos_x, pos_y in get_all_positions(x_start=0, x_end=self.dst_width, y_start=0, y_end=self.dst_height):
+        print("\npixelate...")
+        for pos_x, pos_y in tqdm(
+            all_positions, total=self.dst_width * self.dst_height, ncols=self.dst_width, unit="px"
+        ):
             histogram = get_color_histogram(image, pos_x, pos_y)
             rgb_value = max(histogram.items(), key=operator.itemgetter(1))[0]
             palette[rgb_value].append((pos_x, pos_y))
 
-        for pixel, positions in palette.items():
+        print("\nfind nearest colors...")
+        for pixel, positions in tqdm(palette.items(), ncols=self.dst_width):
             nearest_color = get_nearest_color(RGB(*pixel))
             for position in positions:
                 image_output.putpixel(position, nearest_color.as_tuple)

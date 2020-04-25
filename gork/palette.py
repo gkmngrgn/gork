@@ -258,5 +258,7 @@ COLORS = [
     Color("#e4e4e4", name="Grey89"),
     Color("#eeeeee", name="Grey93"),
 ]
+COLOR_COUNT = len(COLORS)
 PALETTE = [c.as_rgb.as_tuple for c in COLORS]
 SENSITIVITY = 10
+DEFAULT_WIDTH = 78

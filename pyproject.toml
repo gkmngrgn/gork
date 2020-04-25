@@ -11,6 +11,7 @@ gork = "gork.main:run_cli"
 [tool.poetry.dependencies]
 python = "^3.8"
 pillow = "7.1.1"
+tqdm = "^4.45.0"
 
 [tool.poetry.dev-dependencies]
 mypy = "^0.761"
