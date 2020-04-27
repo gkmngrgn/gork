@@ -20,6 +20,7 @@ class GorkImage:
 
     def export(self, output: str) -> None:
         image = cv2.resize(src=self.image, dsize=(self.src_width, self.src_height), interpolation=cv2.INTER_NEAREST)
+        image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
         cv2.imwrite(output, image)
 
     def generate_pixelated_image(self) -> ImageType:
@@ -28,7 +29,7 @@ class GorkImage:
             dsize=(self.dst_width * SENSITIVITY, self.dst_height * SENSITIVITY),
             interpolation=cv2.INTER_NEAREST,
         )
-        pixelated_image = np.zeros(shape=[self.dst_height, self.dst_width, 3], dtype=np.uint8)
+        pixelated_image = np.empty(shape=[self.dst_height, self.dst_width, 3], dtype=np.uint8)
         palette: typing.Dict[RGBType, typing.List[PositionType]] = collections.defaultdict(list)
         all_positions = get_all_positions(x_start=0, x_end=self.dst_width, y_start=0, y_end=self.dst_height)
 
@@ -46,6 +47,7 @@ class GorkImage:
             for pos_x, pos_y in positions:
                 pixelated_image[pos_y, pos_x] = nearest_color.as_tuple
 
+        pixelated_image = cv2.cvtColor(pixelated_image, cv2.COLOR_BGR2RGB)
         return pixelated_image
 
     def get_color(self, pos_x: int, pos_y: int) -> RGB:

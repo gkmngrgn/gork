@@ -58,7 +58,7 @@ class ImageGenerator:
         counter = 0
 
         for rgb in image.get_spectrum():
-            print(self.get_ansi_color_code(rgb, rgb), sep="", end=f"{ANSI_RES} ")
+            print(self.get_ansi_color_code(rgb, rgb), sep="", end=ANSI_RES)
             counter += 1
 
             if counter >= image.dst_width / 2:
