@@ -46,8 +46,8 @@ class ImageGenerator:
             y2 = 2 * y
 
             for x in range(image.dst_width):
-                top_color = image.get_color(x=x, y=y2)
-                bottom_color = image.get_color(x, y=y2 + 1)
+                top_color = image.get_color(pos_x=x, pos_y=y2)
+                bottom_color = image.get_color(pos_x=x, pos_y=y2 + 1)
                 print(self.get_ansi_color_code(top_color, bottom_color), sep="", end=ANSI_RES, flush=True)
 
             print()
@@ -58,7 +58,7 @@ class ImageGenerator:
         counter = 0
 
         for rgb in image.get_spectrum():
-            print(self.get_ansi_color_code(rgb, rgb), sep="", end=f"{ANSI_RES} ")
+            print(self.get_ansi_color_code(rgb, rgb), sep="", end=ANSI_RES)
             counter += 1
 
             if counter >= image.dst_width / 2:

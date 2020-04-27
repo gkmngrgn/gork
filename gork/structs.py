@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import typing
+import numpy as np
 
+ImageType = np.ndarray
 RGBType = typing.Tuple[int, int, int]
 PositionType = typing.Tuple[int, int]
 
