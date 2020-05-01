@@ -1,9 +1,10 @@
 import collections
 import typing
 
-import numpy as np
 from gork.palette import COLOR_COUNT, COLORS, SENSITIVITY
 from gork.structs import RGB, Color, ImageType, PositionType, RGBType
+
+import numpy as np
 
 
 def get_all_positions(x_start: int, x_end: int, y_start: int, y_end: int) -> typing.Iterator[PositionType]:
@@ -46,3 +47,15 @@ def get_nearest_color(rgb: RGB) -> Color:
     for index, color in enumerate(COLORS):
         distances[index] = get_distance(color.as_rgb, rgb)
     return COLORS[np.argmin(distances)]
+
+
+def weight_mean_color(graph, src, dst, n):
+    diff = graph.nodes[dst]["mean color"] - graph.nodes[n]["mean color"]
+    diff = np.linalg.norm(diff)
+    return {"weight": diff}
+
+
+def merge_mean_color(graph, src, dst):
+    graph.nodes[dst]["total color"] += graph.nodes[src]["total color"]
+    graph.nodes[dst]["pixel count"] += graph.nodes[src]["pixel count"]
+    graph.nodes[dst]["mean color"] = graph.nodes[dst]["total color"] / graph.nodes[dst]["pixel count"]

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import typing
+
 import numpy as np
 
 ImageType = np.ndarray

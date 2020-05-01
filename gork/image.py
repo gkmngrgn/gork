@@ -2,11 +2,15 @@ import collections
 import operator
 import typing
 
-import cv2
-import numpy as np
 from gork.palette import SENSITIVITY
 from gork.structs import RGB, ImageType, PositionType, RGBType
-from gork.utils import get_all_positions, get_color_histogram, get_nearest_color
+from gork.utils import get_all_positions, get_color_histogram, get_nearest_color, merge_mean_color, weight_mean_color
+
+import cv2
+import numpy as np
+from skimage import color as sk_color
+from skimage import segmentation as sk_segmentation
+from skimage.future import graph as sk_graph
 from tqdm import tqdm
 
 
@@ -29,10 +33,26 @@ class GorkImage:
             dsize=(self.dst_width * SENSITIVITY, self.dst_height * SENSITIVITY),
             interpolation=cv2.INTER_NEAREST,
         )
+        source_image = cv2.cvtColor(source_image, cv2.COLOR_BGR2RGB)
         pixelated_image = np.empty(shape=[self.dst_height, self.dst_width, 3], dtype=np.uint8)
         palette: typing.Dict[RGBType, typing.List[PositionType]] = collections.defaultdict(list)
         all_positions = get_all_positions(x_start=0, x_end=self.dst_width, y_start=0, y_end=self.dst_height)
 
+        # STEP 1: decrease colors with skimage
+        labels_1 = sk_segmentation.slic(source_image, compactness=10, n_segments=500)
+        graph = sk_graph.rag_mean_color(source_image, labels_1)
+        labels_2 = sk_graph.merge_hierarchical(
+            labels_1,
+            graph,
+            thresh=0.08,
+            rag_copy=False,
+            in_place_merge=True,
+            merge_func=merge_mean_color,
+            weight_func=weight_mean_color,
+        )
+        source_image = sk_color.label2rgb(labels_2, source_image, kind="avg")
+
+        # STEP 2: pixelate image
         print("\npixelate...")
         for pos_x, pos_y in tqdm(
             all_positions, total=self.dst_width * self.dst_height, ncols=self.dst_width, unit="px"
@@ -47,7 +67,6 @@ class GorkImage:
             for pos_x, pos_y in positions:
                 pixelated_image[pos_y, pos_x] = nearest_color.as_tuple
 
-        pixelated_image = cv2.cvtColor(pixelated_image, cv2.COLOR_BGR2RGB)
         return pixelated_image
 
     def get_color(self, pos_x: int, pos_y: int) -> RGB:
