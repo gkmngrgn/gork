@@ -49,7 +49,13 @@ include_trailing_comma = true
 indent = "    "
 line_length = 119
 multi_line_output = 3
-sections = "FUTURE,STDLIB,FIRSTPARTY,THIRDPARTY,LOCALFOLDER"
+sections = [
+    "FUTURE",
+    "STDLIB",
+    "THIRDPARTY",
+    "FIRSTPARTY",
+    "LOCALFOLDER",
+]
 use_parentheses = true
 
 [tool.unimport]

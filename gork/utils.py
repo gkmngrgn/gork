@@ -1,10 +1,10 @@
 import collections
 import typing
 
+import numpy as np
+
 from gork.palette import COLOR_COUNT, COLORS, SENSITIVITY
 from gork.structs import RGB, Color, ImageType, PositionType, RGBType
-
-import numpy as np
 
 
 def get_all_positions(x_start: int, x_end: int, y_start: int, y_end: int) -> typing.Iterator[PositionType]:

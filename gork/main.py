@@ -2,7 +2,7 @@ import argparse
 
 from gork.image import GorkImage
 from gork.palette import DEFAULT_WIDTH, PALETTE
-from gork.structs import RGB
+from gork.structs import RGBType
 
 ANSI_ESC = "\x1B["
 ANSI_CLR = "38;5;{fg};48;5;{bg}"
@@ -12,12 +12,14 @@ ANSI_RES = "\x1b[0m"
 
 class ImageGenerator:
     @staticmethod
-    def get_ansi_color_code(foreground: RGB, background: RGB) -> str:
-        def ccode(rgb: RGB) -> int:
-            return PALETTE.index(rgb.as_tuple)
+    def get_ansi_color_code(top_color: RGBType, bottom_color: RGBType, repeat: int = 1) -> str:
+        def ccode(rgb: RGBType) -> int:
+            return PALETTE.index(tuple(rgb))
 
-        background = background or foreground
-        code_block = [ANSI_ESC, ANSI_CLR.format(fg=ccode(foreground), bg=ccode(background)), ANSI_CHR]
+        code_block = [
+            "".join([ANSI_ESC, ANSI_CLR.format(fg=ccode(top_color), bg=ccode(bottom_color)), ANSI_CHR, ANSI_RES])
+            for _ in range(repeat)
+        ]
         return "".join(code_block)
 
     def parse_args(self) -> argparse.Namespace:
@@ -40,32 +42,27 @@ class ImageGenerator:
         return parser.parse_args()
 
     def print_image(self, image: GorkImage) -> None:
-        print()
+        print("\npreview...")
 
-        for y in range(image.dst_height // 2):
-            y2 = 2 * y
+        lines = []
+        for half_y in range(image.dst_height // 2):
+            y = 2 * half_y
+            line = [
+                self.get_ansi_color_code(top_color=image.get_color(x, y), bottom_color=image.get_color(x, y + 1))
+                for x in range(image.dst_width)
+            ]
+            lines.append("".join(line))
 
-            for x in range(image.dst_width):
-                top_color = image.get_color(pos_x=x, pos_y=y2)
-                bottom_color = image.get_color(pos_x=x, pos_y=y2 + 1)
-                print(self.get_ansi_color_code(top_color, bottom_color), sep="", end=ANSI_RES, flush=True)
-
-            print()
+        print("\n".join(lines), flush=True)
 
     def print_palette(self, image: GorkImage) -> None:
-        print("\nColors of the image")
+        print("\ncolors...")
 
-        counter = 0
+        output = []
+        for index, (color, count) in enumerate(image.get_spectrum()[:10], start=1):
+            output.append(f"{self.get_ansi_color_code(color.as_tuple, color.as_tuple, repeat=2)} {color.name}, {count} pixels\n\n")
 
-        for rgb in image.get_spectrum():
-            print(self.get_ansi_color_code(rgb, rgb), sep="", end=ANSI_RES)
-            counter += 1
-
-            if counter >= image.dst_width / 2:
-                counter = 0
-                print("\n")
-
-        print("\n")
+        print("".join(output))
 
     def run(self) -> None:
         args = self.parse_args()

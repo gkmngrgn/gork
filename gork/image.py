@@ -2,10 +2,6 @@ import collections
 import operator
 import typing
 
-from gork.palette import SENSITIVITY
-from gork.structs import RGB, ImageType, PositionType, RGBType
-from gork.utils import get_all_positions, get_color_histogram, get_nearest_color, merge_mean_color, weight_mean_color
-
 import cv2
 import numpy as np
 from skimage import color as sk_color
@@ -13,10 +9,14 @@ from skimage import segmentation as sk_segmentation
 from skimage.future import graph as sk_graph
 from tqdm import tqdm
 
+from gork.palette import COLORS, PALETTE, SENSITIVITY
+from gork.structs import RGB, Color, ImageType, PositionType, RGBType
+from gork.utils import get_all_positions, get_color_histogram, get_nearest_color, merge_mean_color, weight_mean_color
+
 
 class GorkImage:
     def __init__(self, image_path: str, width: int) -> None:
-        self.spectrum: typing.Dict[typing.Tuple[int, ...], RGB] = {}
+        self.spectrum: typing.Dict[RGBType, int] = collections.defaultdict(int)
         self.image = cv2.imread(image_path)
         self.src_height, self.src_width, _ = self.image.shape
         self.dst_height, self.dst_width = int(width / self.src_width * self.src_height), width
@@ -35,10 +35,10 @@ class GorkImage:
         )
         source_image = cv2.cvtColor(source_image, cv2.COLOR_BGR2RGB)
         pixelated_image = np.empty(shape=[self.dst_height, self.dst_width, 3], dtype=np.uint8)
-        palette: typing.Dict[RGBType, typing.List[PositionType]] = collections.defaultdict(list)
         all_positions = get_all_positions(x_start=0, x_end=self.dst_width, y_start=0, y_end=self.dst_height)
 
         # STEP 1: decrease colors with skimage
+        print("\nmerge colors using Region Adjacency Graph (RAG)...")
         labels_1 = sk_segmentation.slic(source_image, compactness=10, n_segments=500)
         graph = sk_graph.rag_mean_color(source_image, labels_1)
         labels_2 = sk_graph.merge_hierarchical(
@@ -53,6 +53,8 @@ class GorkImage:
         source_image = sk_color.label2rgb(labels_2, source_image, kind="avg")
 
         # STEP 2: pixelate image
+        palette: typing.Dict[RGBType, typing.List[PositionType]] = collections.defaultdict(list)
+
         print("\npixelate...")
         for pos_x, pos_y in tqdm(
             all_positions, total=self.dst_width * self.dst_height, ncols=self.dst_width, unit="px"
@@ -64,16 +66,18 @@ class GorkImage:
         print("\nfind nearest colors...")
         for pixel, positions in tqdm(palette.items(), ncols=self.dst_width):
             nearest_color = get_nearest_color(RGB(*pixel))
+            self.spectrum[nearest_color.as_tuple] += 1
             for pos_x, pos_y in positions:
                 pixelated_image[pos_y, pos_x] = nearest_color.as_tuple
 
         return pixelated_image
 
-    def get_color(self, pos_x: int, pos_y: int) -> RGB:
-        pixel = tuple(self.image[pos_y, pos_x])
-        if pixel not in self.spectrum:
-            self.spectrum[pixel] = RGB(*pixel)
-        return self.spectrum[pixel]
+    def get_color(self, pos_x: int, pos_y: int) -> np.ndarray:
+        return self.image[pos_y, pos_x]
 
-    def get_spectrum(self) -> typing.List[RGB]:
-        return sorted(set(self.spectrum.values()))
+    def get_spectrum(self) -> typing.List[typing.Tuple[Color, int]]:
+        spectrum = [
+            (COLORS[PALETTE.index(rgb)], count)
+            for rgb, count in sorted(self.spectrum.items(), key=operator.itemgetter(1), reverse=True)
+        ]
+        return spectrum
