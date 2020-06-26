@@ -7,6 +7,9 @@ from gork.palette import COLOR_COUNT, COLORS, SENSITIVITY
 from gork.structs import RGB, Color, ImageType, PositionType, RGBType
 
 
+DEFAULT_PIXEL_SIZE = 10
+DEFAULT_N_CLUSTERS = 256
+
 def get_all_positions(x_start: int, x_end: int, y_start: int, y_end: int) -> typing.Iterator[PositionType]:
     for pos_y in range(y_start, y_end):
         for pos_x in range(x_start, x_end):

@@ -6,7 +6,7 @@ authors = ["Gökmen Görgen <gkmngrgn@gmail.com>"]
 license = "MIT"
 
 [tool.poetry.scripts]
-gork = "gork.main:run_cli"
+gork = "gork.cli:run_cli"
 
 [tool.poetry.dependencies]
 python = "^3.8"
@@ -14,6 +14,7 @@ tqdm = "^4.45.0"
 opencv-python-headless = "4.2.0.34"
 numpy = "1.18.3"
 scikit-image = "0.16.2"
+scikit-learn = "0.23.1"
 
 [tool.poetry.dev-dependencies]
 mypy = "^0.761"
@@ -25,7 +26,6 @@ coverage = {version = "5.1", extras = ["toml"]}
 unimport = "0.2.4"
 
 [tool.black]
-line-length = 119
 target-version = ['py38']
 include = '\.pyi?$'
 exclude = '''
@@ -47,7 +47,6 @@ source = ["./gork"]
 force_grid_wrap = 0
 include_trailing_comma = true
 indent = "    "
-line_length = 119
 multi_line_output = 3
 sections = [
     "FUTURE",

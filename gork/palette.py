@@ -261,4 +261,4 @@ COLORS = [
 COLOR_COUNT = len(COLORS)
 PALETTE = [c.as_rgb.as_tuple for c in COLORS]
 SENSITIVITY = 10
-DEFAULT_WIDTH = 78
+DEFAULT_WIDTH = 78  # FIXME: remove this line
