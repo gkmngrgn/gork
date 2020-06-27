@@ -5,11 +5,10 @@ import typing
 import cv2
 import numpy as np
 from gork.palette import COLORS, PALETTE
-from gork.structs import RGB, Color, ImageType, PositionType, RGBType
+from gork.structs import RGB, Color, ImageType, RGBType
 from gork.utils import (
     DEFAULT_N_CLUSTERS,
     DEFAULT_PIXEL_SIZE,
-    get_all_positions,
     get_nearest_color,
 )
 from sklearn.cluster import MiniBatchKMeans
@@ -56,23 +55,10 @@ class GorkImage:
             image, (self.dst_width, self.dst_height), interpolation=cv2.INTER_LINEAR,
         )
 
-        # The following part is not ready yet.
-        # TODO: 128 * 96 = 12288 pixels, 5466 different colors. is that normal?
-        palette: typing.Dict[
-            RGBType, typing.List[PositionType]
-        ] = collections.defaultdict(list)
-
-        for pos_x, pos_y in get_all_positions(
-            x_start=0, x_end=self.dst_width, y_start=0, y_end=self.dst_height
-        ):
-            rgb_value = tuple(image[pos_y, pos_x])
-            palette[rgb_value].append((pos_x, pos_y))
-
-        for pixel, positions in palette.items():
-            nearest_color = get_nearest_color(RGB(*pixel))
+        for color in np.unique(image.reshape(-1, image.shape[2]), axis=0):
+            nearest_color = get_nearest_color(RGB(*color))
+            image[np.where((image == color).all(axis=2))] = nearest_color.as_tuple
             self.spectrum[nearest_color.as_tuple] += 1
-            for pos_x, pos_y in positions:
-                image[pos_y, pos_x] = nearest_color.as_tuple
 
         image = cv2.resize(
             image, (self.src_width, self.src_height), interpolation=cv2.INTER_NEAREST

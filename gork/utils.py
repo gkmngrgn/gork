@@ -1,19 +1,9 @@
-import typing
-
 import numpy as np
 from gork.palette import COLOR_COUNT, COLORS
-from gork.structs import RGB, Color, PositionType
+from gork.structs import RGB, Color
 
 DEFAULT_PIXEL_SIZE = 10
 DEFAULT_N_CLUSTERS = 256
-
-
-def get_all_positions(
-    x_start: int, x_end: int, y_start: int, y_end: int
-) -> typing.Iterator[PositionType]:
-    for pos_y in range(y_start, y_end):
-        for pos_x in range(x_start, x_end):
-            yield (pos_x, pos_y)
 
 
 def get_distance(c1: RGB, c2: RGB) -> np.float64:
