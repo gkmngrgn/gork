@@ -57,8 +57,8 @@ class GorkImage:
 
         for color in np.unique(image.reshape(-1, image.shape[2]), axis=0):
             nearest_color = get_nearest_color(RGB(*color))
-            image[np.where((image == color).all(axis=2))] = nearest_color.as_tuple
-            self.spectrum[nearest_color.as_tuple] += 1
+            image[np.where((image == color).all(axis=2))] = nearest_color
+            self.spectrum[nearest_color] += 1
 
         image = cv2.resize(
             image, (self.src_width, self.src_height), interpolation=cv2.INTER_NEAREST
