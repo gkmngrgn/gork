@@ -6,7 +6,9 @@ from gork.utils import DEFAULT_PIXEL_SIZE
 
 def run_cli() -> None:
     parser = argparse.ArgumentParser(
-        prog="gork", description="Pixelate an image and recognize the objects.",
+        prog="gork",
+        description="Pixelate an image and recognize the objects.",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     sub_parsers = parser.add_subparsers(
         dest="sub_cmd",
@@ -14,12 +16,11 @@ def run_cli() -> None:
         description="valid subcommands",
         help="additional help",
     )
-
-    sub_cmd_analyzer = sub_parsers.add_parser("analyze")
+    sub_cmd_analyzer = add_sub_command(sub_parsers, "analyze")
     add_common_arguments(sub_cmd_analyzer)
     sub_cmd_analyzer.add_argument("--export")
 
-    sub_cmd_export = sub_parsers.add_parser("export")
+    sub_cmd_export = add_sub_command(sub_parsers, "export")
     add_common_arguments(sub_cmd_export)
     sub_cmd_export.add_argument("destination")
     sub_cmd_export.add_argument(
@@ -29,7 +30,7 @@ def run_cli() -> None:
         help="set width of the image as character length",
     )
 
-    sub_cmd_print = sub_parsers.add_parser("print")
+    sub_cmd_print = add_sub_command(sub_parsers, "print")
     add_common_arguments(sub_cmd_print)
     sub_cmd_print.add_argument("--width")
 
@@ -53,6 +54,15 @@ def run_cli() -> None:
 
     if args.sub_cmd == "print":
         print_image(image)
+
+
+def add_sub_command(
+    sub_parsers: argparse.Action, cmd_name: str
+) -> argparse.ArgumentParser:
+    sub_command = sub_parsers.add_parser(
+        cmd_name, formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    )
+    return sub_command
 
 
 def add_common_arguments(parser) -> None:
