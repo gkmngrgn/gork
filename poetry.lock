@@ -482,17 +482,6 @@ version = "3.7.4.2"
 
 [[package]]
 category = "dev"
-description = "A python CLI library to detect or auto remove unused Python imports."
-name = "unimport"
-optional = false
-python-versions = ">=3.6.0"
-version = "0.2.4"
-
-[package.extras]
-pyproject = ["toml"]
-
-[[package]]
-category = "dev"
 description = "Measures number of Terminal column cells of wide-character codes"
 name = "wcwidth"
 optional = false
@@ -500,7 +489,7 @@ python-versions = "*"
 version = "0.1.9"
 
 [metadata]
-content-hash = "5a3b9336c3b192cd8bbe909b45c76552082c5dffc2b90357953acb20aa136bc8"
+content-hash = "93c22e200a39b3cf510c292836eb68ed6bc2e29a9582341749f405ba5afc1861"
 python-versions = "^3.8"
 
 [metadata.files]
@@ -816,10 +805,6 @@ typing-extensions = [
     {file = "typing_extensions-3.7.4.2-py2-none-any.whl", hash = "sha256:f8d2bd89d25bc39dabe7d23df520442fa1d8969b82544370e03d88b5a591c392"},
     {file = "typing_extensions-3.7.4.2-py3-none-any.whl", hash = "sha256:6e95524d8a547a91e08f404ae485bbb71962de46967e1b71a0cb89af24e761c5"},
     {file = "typing_extensions-3.7.4.2.tar.gz", hash = "sha256:79ee589a3caca649a9bfd2a8de4709837400dfa00b6cc81962a1e6a1815969ae"},
-]
-unimport = [
-    {file = "unimport-0.2.4-py3-none-any.whl", hash = "sha256:4e430fd435eaae5c0a6797793c8f11899ec5311a3d11095cfceb9ddc062bd0a3"},
-    {file = "unimport-0.2.4.tar.gz", hash = "sha256:d07c2065ac80c45c876c18b3ed17a267a14576da162bf9cc30bd2d5fa55ed033"},
 ]
 wcwidth = [
     {file = "wcwidth-0.1.9-py2.py3-none-any.whl", hash = "sha256:cafe2186b3c009a04067022ce1dcd79cb38d8d65ee4f4791b8888d6599d1bbe1"},
