@@ -17,13 +17,19 @@ poetry run gork print --width=80 \
                       --ignore-cache
 
 # default pixel size is 10.
-poetry run gork export --pixel-size=15 \
-                       --input=./files/park.png \
-                       --output=./files/park_output.png \
+poetry run gork export ./files/park.png \
+                       ./files/park_output.png \
+                       --pixel-size=15 \
                        --ignore-cache
 ```
 
-![](files/b_output.jpg)
+| Original                             | Pixelated                                   |
+|--------------------------------------|---------------------------------------------|
+| ![](examples/emoji_disappointed.png) | ![](examples/emoji_disappointed_output.png) |
+| ![](examples/emoji_heart.png)        | ![](examples/emoji_heart_output.png)        |
+| ![](examples/emoji_watermelon.png)   | ![](examples/emoji_watermelon_output.png)   |
+| ![](examples/building.png)           | ![](examples/building_output.png)           |
+| ![](examples/park.png)               | ![](examples/park_output.png)               |
 
 The terminal output:
 

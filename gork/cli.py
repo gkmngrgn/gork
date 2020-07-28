@@ -40,7 +40,7 @@ def run_cli() -> None:
         return
 
     image = GorkImage(
-        image_path=args.source.name,
+        image_content=args.source.read(),
         pixel_size=args.pixel_size,
         save_results=True,
         ignore_cache=args.ignore_cache,
