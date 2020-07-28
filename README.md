@@ -2,7 +2,7 @@
 
 I derived the name from Zork that is a first text-based adventure game.
 
-```
+```shell
 poetry install
 poetry run gork --help
 
@@ -40,7 +40,7 @@ helped me to display the image in the terminal.
 
 # Contributing
 
-```
+```shell
 poetry run pytest
 
 # to generate report
