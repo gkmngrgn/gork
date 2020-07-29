@@ -3,24 +3,24 @@
 I derived the name from Zork that is a first text-based adventure game.
 
 ```shell
-poetry install
-poetry run gork --help
+pip install -r requirements.txt
+python -m gork.cli --help
 
 # colors, texts, recognitions, etc
-poetry run gork analyze --input=./files/park.png \
-                        --output=./files/park_report.txt \
-                        --ignore-cache
+python -m gork.cli analyze --input=./files/park.png \
+                           --output=./files/park_report.txt \
+                           --ignore-cache
 
 # default width, terminal width scale it by height.
-poetry run gork print --width=80 \
-                      --input=./files/park.png \
-                      --ignore-cache
+python -m gork.cli print --width=80 \
+                         --input=./files/park.png \
+                         --ignore-cache
 
 # default pixel size is 10.
-poetry run gork export ./files/park.png \
-                       ./files/park_output.png \
-                       --pixel-size=15 \
-                       --ignore-cache
+python -m gork.cli export ./files/park.png \
+                          ./files/park_output.png \
+                          --pixel-size=15 \
+                          --ignore-cache
 ```
 
 | Original                             | Pixelated                                   |
@@ -41,11 +41,8 @@ helped me to display the image in the terminal.
 # Contributing
 
 ```shell
-poetry run pytest
-
-# to generate report
-poetry run coverage run -m pytest
-poetry run coverage report -m
+pip install -r requirements-dev.txt
+pytest
 ```
 
 [1]: https://github.com/connor-makowski/pixelator
