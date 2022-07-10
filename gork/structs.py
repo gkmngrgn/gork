@@ -19,7 +19,9 @@ class RGB:
         return f"rgb({self.red}, {self.green}, {self.blue})"
 
     def __gt__(self, other: RGB) -> bool:
-        return self.red > other.red and self.green > other.green and self.blue > other.blue
+        return (
+            self.red > other.red and self.green > other.green and self.blue > other.blue
+        )
 
     @property
     def as_tuple(self) -> RGBType:
@@ -34,7 +36,9 @@ class Color:
     def __init__(self, hex_code: str, name: str) -> None:
         self.hex_code = hex_code.lstrip("#")
         self.name = name
-        self.red, self.green, self.blue = (int(self.hex_code[i : i + 2], 16) for i in (0, 2, 4))
+        self.red, self.green, self.blue = (
+            int(self.hex_code[i : i + 2], 16) for i in (0, 2, 4)
+        )
 
     def __repr__(self) -> str:
         return f"{self.name} #{self.hex_code}"

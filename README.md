@@ -1,7 +1,5 @@
 # GORK
 
-[![codecov](https://codecov.io/gh/gkmngrgn/gork/branch/master/graph/badge.svg)](https://codecov.io/gh/gkmngrgn/gork)
-
 I derived the name from Zork that is a first text-based adventure game.
 
 ```shell

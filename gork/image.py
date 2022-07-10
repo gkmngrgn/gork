@@ -4,14 +4,11 @@ import typing
 
 import cv2
 import numpy as np
+from sklearn.cluster import MiniBatchKMeans
+
 from gork.palette import COLORS, PALETTE
 from gork.structs import RGB, Color, ImageType, RGBType
-from gork.utils import (
-    DEFAULT_N_CLUSTERS,
-    DEFAULT_PIXEL_SIZE,
-    get_nearest_color,
-)
-from sklearn.cluster import MiniBatchKMeans
+from gork.utils import DEFAULT_N_CLUSTERS, DEFAULT_PIXEL_SIZE, get_nearest_color
 
 
 class GorkImage:
@@ -48,7 +45,9 @@ class GorkImage:
             ].reshape((self.__src_height, self.__src_width, 3))
             image = cv2.cvtColor(quantized_colorspace, cv2.COLOR_LAB2BGR)
             image = cv2.resize(
-                image, (self.width, self.height), interpolation=cv2.INTER_LINEAR,
+                image,
+                (self.width, self.height),
+                interpolation=cv2.INTER_LINEAR,
             )
 
             for color in np.unique(image.reshape(-1, image.shape[2]), axis=0):

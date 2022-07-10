@@ -4,7 +4,9 @@ from gork.image import GorkImage
 
 
 def test_image_size():
-    image_path = pathlib.Path(__file__).parent / ".." / "examples" / "emoji_watermelon.png"
+    image_path = (
+        pathlib.Path(__file__).parent / ".." / "examples" / "emoji_watermelon.png"
+    )
     image = GorkImage(image_content=image_path.read_bytes())
     assert image.width == 32
     assert image.height == 32

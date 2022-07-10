@@ -1,31 +1,40 @@
-[tool.black]
-target-version = ['py38']
-include = '\.pyi?$'
-exclude = '''
-(
-  /(
-      \.eggs
-    | \.git
-    | venv
-    | frontend
-  )/
-  | settings.py
-)
-'''
+[tool.poetry]
+name = "gork"
+version = "0.1.0"
+description = "CLI based 8bit image pixelator, text & object recognition app."
+authors = ["Gökmen Görgen <gkmngrgn@gmail.com>"]
+license = "MIT"
 
-[tool.coverage.run]
-source = ["./gork"]
+[tool.poetry.dependencies]
+python = ">=3.9,<3.11"
+numpy = "^1.23.1"
+scipy = "^1.8.1"
+scikit-learn = "^1.1.1"
+opencv-python-headless = "^4.6.0"
 
-[tool.isort]
-force_grid_wrap = 0
-include_trailing_comma = true
-indent = "    "
-multi_line_output = 3
-sections = [
-    "FUTURE",
-    "STDLIB",
-    "THIRDPARTY",
-    "FIRSTPARTY",
-    "LOCALFOLDER",
-]
-use_parentheses = true
+[tool.poetry.dev-dependencies]
+pytest = "^7.1.2"
+pytest-cov = "^3.0.0"
+poethepoet = "^0.15.0"
+
+[tool.poe.tasks.gork]
+script = "gork.cli:run()"
+help = "Run gork for testing app without installing."
+
+[tool.poe.tasks.lint]
+cmd = "pre-commit run --all-files"
+help = "Check code quality"
+
+[tool.poe.tasks.test]
+cmd = "pytest -sk $name"
+help = "Run tests"
+
+[[tool.poe.tasks.test.args]]
+name = "name"
+positional = true
+default = "test"
+help = "Filter tests by $name"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

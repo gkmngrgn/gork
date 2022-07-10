@@ -1,4 +1,5 @@
 import scipy.spatial as sp
+
 from gork.structs import Color
 
 COLORS = [

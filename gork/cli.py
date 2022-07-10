@@ -67,7 +67,9 @@ def add_sub_command(
 
 def add_common_arguments(parser) -> None:
     parser.add_argument(
-        "source", type=argparse.FileType("rb"), help="original image file path",
+        "source",
+        type=argparse.FileType("rb"),
+        help="original image file path",
     )
     parser.add_argument("--ignore-cache")
 
