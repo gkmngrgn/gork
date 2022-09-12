@@ -1,3 +1,4 @@
+"""GORK image module."""
 import collections
 import operator
 from typing import Dict, List, Tuple
@@ -14,11 +15,14 @@ DEFAULT_N_CLUSTERS = 256
 
 
 def get_nearest_color(rgb: RGB) -> Color:
+    """Return nearest color orf rgb value."""
     _, result = COLOR_TREE.query(rgb.as_tuple)
     return PALETTE[result]
 
 
 class GorkImage:
+    """Gork image processor."""
+
     def __init__(
         self,
         image_content: bytes,
@@ -26,6 +30,7 @@ class GorkImage:
         save_results: bool = True,
         ignore_cache: bool = False,
     ) -> None:
+        """Initialize a new processor to generate pixelated image."""
         # private
         image_content = np.frombuffer(image_content, np.uint8)
         self.__src_image = cv2.imdecode(image_content, cv2.IMREAD_COLOR)
@@ -41,6 +46,7 @@ class GorkImage:
 
     @property
     def image(self) -> ImageType:
+        """Return pixelated image."""
         if self.__image is None:
             colorspace = cv2.cvtColor(self.__src_image, cv2.COLOR_BGR2LAB)
             clt = MiniBatchKMeans(n_clusters=self.n_clusters)
@@ -72,6 +78,7 @@ class GorkImage:
 
     @property
     def spectrum(self) -> List[Tuple[Color, int]]:
+        """Return color list of the pixelated image."""
         spectrum = [
             (COLORS[PALETTE.index(rgb)], count)
             for rgb, count in sorted(
@@ -81,9 +88,11 @@ class GorkImage:
         return spectrum
 
     def get_color(self, pos_x: int, pos_y: int) -> np.ndarray:
+        """Return color of a position on the pixelated image."""
         return self.image[pos_y, pos_x]
 
     def export(self, output: str) -> None:
+        """Save image output."""
         image = cv2.resize(
             src=self.image,
             dsize=(self.__src_width, self.__src_height),

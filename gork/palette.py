@@ -1,3 +1,4 @@
+"""GORK default color palette."""
 import scipy.spatial as sp
 
 from gork.structs import Color
