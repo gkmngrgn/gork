@@ -22,6 +22,10 @@ pylint = "^2.15.2"
 [tool.poetry.scripts]
 gork = "gork.cli:run_cli"
 
+[tool.poe.tasks.build]
+cmd = "bash scripts/build.sh"
+help = "Build gork"
+
 [tool.poe.tasks.lint]
 cmd = "pre-commit run --all-files"
 help = "Check code quality"
