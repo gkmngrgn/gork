@@ -1,19 +1,22 @@
 from __future__ import annotations
 
-import typing
+from dataclasses import dataclass
+from typing import Tuple
 
 import numpy as np
 
 ImageType = np.ndarray
-RGBType = typing.Tuple[int, int, int]
-PositionType = typing.Tuple[int, int]
+RGBType = Tuple[int, int, int]
+PositionType = Tuple[int, int]
 
 
+@dataclass
 class RGB:
-    def __init__(self, red: int, green: int, blue: int) -> None:
-        self.red = red
-        self.green = green
-        self.blue = blue
+    """A dataclass for keeping pixel color information."""
+
+    red: int
+    green: int
+    blue: int
 
     def __repr__(self) -> str:
         return f"rgb({self.red}, {self.green}, {self.blue})"
@@ -48,5 +51,5 @@ class Color:
         return RGB(red=self.red, green=self.green, blue=self.blue)
 
     @property
-    def as_tuple(self) -> typing.Tuple[int, int, int]:
+    def as_tuple(self) -> Tuple[int, int, int]:
         return self.as_rgb.as_tuple
