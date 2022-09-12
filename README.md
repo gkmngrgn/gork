@@ -3,7 +3,7 @@
 I derived the name from Zork that is a first text-based adventure game.
 
 ```shell
-pip install -r requirements.txt
+poetry install
 python -m gork.cli --help
 
 # colors, texts, recognitions, etc
@@ -41,8 +41,8 @@ helped me to display the image in the terminal.
 # Contributing
 
 ```shell
-pip install -r requirements-dev.txt
-pytest
+poetry poe test
+poetry run pytest
 ```
 
 [1]: https://github.com/connor-makowski/pixelator
