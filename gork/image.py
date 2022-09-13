@@ -27,8 +27,6 @@ class GorkImage:
         self,
         image_content: bytes,
         pixel_size: int = DEFAULT_PIXEL_SIZE,
-        save_results: bool = True,
-        ignore_cache: bool = False,
     ) -> None:
         """Initialize a new processor to generate pixelated image."""
         # private
@@ -39,9 +37,7 @@ class GorkImage:
         self.__spectrum: Dict[RGBType, int] = collections.defaultdict(int)
 
         # public
-        self.pixel_size = pixel_size
-        self.n_clusters = DEFAULT_N_CLUSTERS
-        self.width = self.__src_width // self.pixel_size
+        self.width = self.__src_width // pixel_size
         self.height = int(self.width / self.__src_width * self.__src_height)
 
     @property
@@ -49,7 +45,7 @@ class GorkImage:
         """Return pixelated image."""
         if self.__image is None:
             colorspace = cv2.cvtColor(self.__src_image, cv2.COLOR_BGR2LAB)
-            clt = MiniBatchKMeans(n_clusters=self.n_clusters)
+            clt = MiniBatchKMeans(n_clusters=DEFAULT_N_CLUSTERS)
             labels = clt.fit_predict(
                 colorspace.reshape((self.__src_width * self.__src_height, 3))
             )

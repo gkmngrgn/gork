@@ -1,8 +1,8 @@
 """GORK command line interface."""
 import argparse
 
-from gork.image import GorkImage
-from gork.palette import DEFAULT_WIDTH, PALETTE
+from gork.image import DEFAULT_PIXEL_SIZE, GorkImage
+from gork.palette import PALETTE
 from gork.structs import RGBType
 
 ANSI_ESC = "\x1B["
@@ -40,7 +40,9 @@ class ImageGenerator:
         """Parse CLI arguments."""
         parser = argparse.ArgumentParser(description="My best image effect.")
         parser.add_argument(
-            dest="src", type=argparse.FileType("rb"), help="original image file path"
+            "source",
+            type=argparse.FileType("rb"),
+            help="original image file path",
         )
         parser.add_argument(
             "-o",
@@ -57,11 +59,9 @@ class ImageGenerator:
             help="print color palette of image",
         )
         parser.add_argument(
-            "-w",
-            "--width",
-            dest="width",
+            "--pixel-size",
             type=int,
-            default=DEFAULT_WIDTH,
+            default=DEFAULT_PIXEL_SIZE,
             help="set width of the image as character length",
         )
         return parser.parse_args()
@@ -100,7 +100,7 @@ class ImageGenerator:
     def run(self) -> None:
         """Run CLI app for the parsed arguments."""
         args = self.parse_args()
-        image = GorkImage(image_path=args.src.name, width=args.width)
+        image = GorkImage(image_content=args.source.read(), pixel_size=args.pixel_size)
 
         self.print_image(image=image)
 
