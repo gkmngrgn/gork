@@ -21,7 +21,7 @@ class ImageGenerator:
         """Get ANSI color code."""
 
         def ccode(rgb: RGBType) -> int:
-            return PALETTE.index(tuple(rgb))
+            return PALETTE.index(rgb)
 
         code_block = [
             "".join(
@@ -71,14 +71,14 @@ class ImageGenerator:
         print("\npreview...")
 
         lines = []
-        for half_y in range(image.dst_height // 2):
+        for half_y in range(image.height // 2):
             pos_y = 2 * half_y
             line = [
                 self.get_ansi_color_code(
                     top_color=image.get_color(pos_x, pos_y),
                     bottom_color=image.get_color(pos_x, pos_y + 1),
                 )
-                for pos_x in range(image.dst_width)
+                for pos_x in range(image.width)
             ]
             lines.append("".join(line))
 
@@ -89,7 +89,7 @@ class ImageGenerator:
         print("\ncolors...")
 
         output = []
-        for color, count in image.get_spectrum()[:10]:
+        for color, count in image.spectrum[:10]:
             color_code = self.get_ansi_color_code(
                 color.as_tuple, color.as_tuple, repeat=2
             )

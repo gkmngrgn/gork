@@ -14,9 +14,9 @@ DEFAULT_PIXEL_SIZE = 10
 DEFAULT_N_CLUSTERS = 256
 
 
-def get_nearest_color(rgb: RGB) -> Color:
+def get_nearest_color(rgb: RGB) -> RGBType:
     """Return nearest color orf rgb value."""
-    _, result = COLOR_TREE.query(rgb.as_tuple)
+    result: int = COLOR_TREE.query(rgb.as_tuple)[1]
     return PALETTE[result]
 
 
