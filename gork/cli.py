@@ -39,7 +39,12 @@ def run_cli() -> None:
         "print", formatter_class=ArgumentDefaultsHelpFormatter
     )
     add_common_arguments(sub_cmd_print)
-    sub_cmd_print.add_argument("--width")
+    sub_cmd_print.add_argument(
+        "--width",
+        type=int,
+        required=True,
+        help="set width of the image as character length",
+    )
 
     args = parser.parse_args()
     if args.sub_cmd is None:
@@ -48,19 +53,24 @@ def run_cli() -> None:
 
     image = GorkImage(
         image_content=args.source.read(),
-        pixel_size=args.pixel_size,
         # save_results=True,
         # ignore_cache=args.ignore_cache,
     )
 
-    # if args.sub_cmd == "analyze":
-    #     print_report(image)
+    if hasattr(args, "width"):
+        image.pixel_size = image.src_width // args.width
+    else:
+        image.pixel_size = args.pixel_size
+
+    # SUBCOMMANDS
+    if args.sub_cmd == "analyze":
+        run_analyze(image)
 
     if args.sub_cmd == "export":
-        image.export(output=args.destination)
+        run_export(image, args.destination)
 
-    # if args.sub_cmd == "print":
-    #     print_image(image)
+    if args.sub_cmd == "print":
+        run_print(image)
 
 
 def add_common_arguments(parser: ArgumentParser) -> None:
@@ -73,11 +83,16 @@ def add_common_arguments(parser: ArgumentParser) -> None:
     parser.add_argument("--ignore-cache")
 
 
-# def print_report(image: GorkImage) -> None:
-#     """Generate report about the pixelated image."""
-#     pass
+def run_analyze(_: GorkImage) -> None:
+    """Generate report about the pixelated image."""
+    print("not ready yet.")
 
 
-# def print_image(image: GorkImage) -> None:
-#     """Print pixelated image to terminal."""
-#     pass
+def run_export(image: GorkImage, destination: str) -> None:
+    """Save output as an image file."""
+    image.export(output=destination)
+
+
+def run_print(_: GorkImage) -> None:
+    """Print pixelated image to terminal."""
+    print("not ready yet.")
