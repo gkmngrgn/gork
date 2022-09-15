@@ -1,117 +1,83 @@
 """GORK command line interface."""
-import argparse
+from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser, FileType
 
-from gork.image import DEFAULT_PIXEL_SIZE, GorkImage
-from gork.palette import PALETTE
-from gork.structs import RGBType
-
-ANSI_ESC = "\x1B["
-ANSI_CLR = "38;5;{fg};48;5;{bg}"
-ANSI_CHR = "m▀"
-ANSI_RES = "\x1b[0m"
-
-
-class ImageGenerator:
-    """Pixelated image generator."""
-
-    @staticmethod
-    def get_ansi_color_code(
-        top_color: RGBType, bottom_color: RGBType, repeat: int = 1
-    ) -> str:
-        """Get ANSI color code."""
-
-        def ccode(rgb: RGBType) -> int:
-            return PALETTE.index(rgb)
-
-        code_block = [
-            "".join(
-                [
-                    ANSI_ESC,
-                    ANSI_CLR.format(fg=ccode(top_color), bg=ccode(bottom_color)),
-                    ANSI_CHR,
-                    ANSI_RES,
-                ]
-            )
-            for _ in range(repeat)
-        ]
-        return "".join(code_block)
-
-    def parse_args(self) -> argparse.Namespace:
-        """Parse CLI arguments."""
-        parser = argparse.ArgumentParser(description="My best image effect.")
-        parser.add_argument(
-            "source",
-            type=argparse.FileType("rb"),
-            help="original image file path",
-        )
-        parser.add_argument(
-            "-o",
-            "--output",
-            dest="output",
-            type=argparse.FileType("wb"),
-            help="export image to a file",
-        )
-        parser.add_argument(
-            "-p",
-            "--show-palette",
-            dest="palette",
-            action="store_true",
-            help="print color palette of image",
-        )
-        parser.add_argument(
-            "--pixel-size",
-            type=int,
-            default=DEFAULT_PIXEL_SIZE,
-            help="set width of the image as character length",
-        )
-        return parser.parse_args()
-
-    def print_image(self, image: GorkImage) -> None:
-        """Print pixelated image preview in terminal."""
-        print("\npreview...")
-
-        lines = []
-        for half_y in range(image.height // 2):
-            pos_y = 2 * half_y
-            line = [
-                self.get_ansi_color_code(
-                    top_color=image.get_color(pos_x, pos_y),
-                    bottom_color=image.get_color(pos_x, pos_y + 1),
-                )
-                for pos_x in range(image.width)
-            ]
-            lines.append("".join(line))
-
-        print("\n".join(lines), flush=True)
-
-    def print_palette(self, image: GorkImage) -> None:
-        """Print pixelated image colors."""
-        print("\ncolors...")
-
-        output = []
-        for color, count in image.spectrum[:10]:
-            color_code = self.get_ansi_color_code(
-                color.as_tuple, color.as_tuple, repeat=2
-            )
-            output.append(f"{color_code} {color.name}, {count} pixels\n\n")
-
-        print("".join(output))
-
-    def run(self) -> None:
-        """Run CLI app for the parsed arguments."""
-        args = self.parse_args()
-        image = GorkImage(image_content=args.source.read(), pixel_size=args.pixel_size)
-
-        self.print_image(image=image)
-
-        if args.palette is True:
-            self.print_palette(image=image)
-
-        if args.output:
-            image.export(output=args.output.name)
+from gork.image import GorkImage
 
 
 def run_cli() -> None:
-    """Run image generator."""
-    image_generator = ImageGenerator()
-    image_generator.run()
+    """Run image generator for parameters."""
+    parser = ArgumentParser(
+        prog="gork",
+        description="Pixelate an image and recognize the objects.",
+        formatter_class=ArgumentDefaultsHelpFormatter,
+    )
+    sub_parsers = parser.add_subparsers(
+        dest="sub_cmd",
+        title="subcommands",
+        description="valid subcommands",
+        help="additional help",
+    )
+    sub_cmd_analyzer = sub_parsers.add_parser(
+        "analyze", formatter_class=ArgumentDefaultsHelpFormatter
+    )
+    add_common_arguments(sub_cmd_analyzer)
+    sub_cmd_analyzer.add_argument("--export")
+
+    sub_cmd_export = sub_parsers.add_parser(
+        "export", formatter_class=ArgumentDefaultsHelpFormatter
+    )
+    add_common_arguments(sub_cmd_export)
+    sub_cmd_export.add_argument("destination")
+    sub_cmd_export.add_argument(
+        "--pixel-size",
+        type=int,
+        default=10,
+        help="set width of the image as character length",
+    )
+
+    sub_cmd_print = sub_parsers.add_parser(
+        "print", formatter_class=ArgumentDefaultsHelpFormatter
+    )
+    add_common_arguments(sub_cmd_print)
+    sub_cmd_print.add_argument("--width")
+
+    args = parser.parse_args()
+    if args.sub_cmd is None:
+        parser.print_help()
+        return
+
+    image = GorkImage(
+        image_content=args.source.read(),
+        pixel_size=args.pixel_size,
+        # save_results=True,
+        # ignore_cache=args.ignore_cache,
+    )
+
+    # if args.sub_cmd == "analyze":
+    #     print_report(image)
+
+    if args.sub_cmd == "export":
+        image.export(output=args.destination)
+
+    # if args.sub_cmd == "print":
+    #     print_image(image)
+
+
+def add_common_arguments(parser: ArgumentParser) -> None:
+    """Add common arguments for each sub commands."""
+    parser.add_argument(
+        "source",
+        type=FileType("rb"),
+        help="original image file path",
+    )
+    parser.add_argument("--ignore-cache")
+
+
+# def print_report(image: GorkImage) -> None:
+#     """Generate report about the pixelated image."""
+#     pass
+
+
+# def print_image(image: GorkImage) -> None:
+#     """Print pixelated image to terminal."""
+#     pass

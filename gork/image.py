@@ -1,7 +1,7 @@
 """GORK image module."""
 import collections
 import operator
-from typing import Dict, List, Tuple
+import typing
 
 import cv2
 import numpy as np
@@ -15,12 +15,12 @@ DEFAULT_N_CLUSTERS = 256
 
 
 def get_nearest_color(rgb: RGB) -> RGBType:
-    """Return nearest color orf rgb value."""
+    """Return nearest color for rgb value."""
     result: int = COLOR_TREE.query(rgb.as_tuple)[1]
     return PALETTE[result]
 
 
-class GorkImage:
+class GorkImage:  # pylint: disable=too-many-instance-attributes
     """Gork image processor."""
 
     def __init__(
@@ -34,10 +34,12 @@ class GorkImage:
         self.__src_image = cv2.imdecode(image_content, cv2.IMREAD_COLOR)
         self.__src_height, self.__src_width, _ = self.__src_image.shape
         self.__image = None
-        self.__spectrum: Dict[RGBType, int] = collections.defaultdict(int)
+        self.__spectrum: typing.Dict[RGBType, int] = collections.defaultdict(int)
 
         # public
-        self.width = self.__src_width // pixel_size
+        self.pixel_size = pixel_size
+        self.n_clusters = DEFAULT_N_CLUSTERS
+        self.width = self.__src_width // self.pixel_size
         self.height = int(self.width / self.__src_width * self.__src_height)
 
     @property
@@ -45,7 +47,7 @@ class GorkImage:
         """Return pixelated image."""
         if self.__image is None:
             colorspace = cv2.cvtColor(self.__src_image, cv2.COLOR_BGR2LAB)
-            clt = MiniBatchKMeans(n_clusters=DEFAULT_N_CLUSTERS)
+            clt = MiniBatchKMeans(n_clusters=self.n_clusters)
             labels = clt.fit_predict(
                 colorspace.reshape((self.__src_width * self.__src_height, 3))
             )
@@ -73,7 +75,7 @@ class GorkImage:
         return self.__image
 
     @property
-    def spectrum(self) -> List[Tuple[Color, int]]:
+    def spectrum(self) -> typing.List[typing.Tuple[Color, int]]:
         """Return color list of the pixelated image."""
         spectrum = [
             (COLORS[PALETTE.index(rgb)], count)
