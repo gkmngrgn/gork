@@ -4,23 +4,23 @@ I derived the name from Zork that is a first text-based adventure game.
 
 ```shell
 poetry install
-python -m gork.cli --help
+poetry run gork --help
 
 # colors, texts, recognitions, etc
-python -m gork.cli analyze --input=./files/park.png \
-                           --output=./files/park_report.txt \
-                           --ignore-cache
+poetry run gork analyze --input=./files/park.png \
+                        --output=./files/park_report.txt \
+                        --ignore-cache
 
 # default width, terminal width scale it by height.
-python -m gork.cli print --width=80 \
-                         --input=./files/park.png \
-                         --ignore-cache
+poetry run gork print --width=80 \
+                      --input=./files/park.png \
+                      --ignore-cache
 
 # default pixel size is 10.
-python -m gork.cli export ./files/park.png \
-                          ./files/park_output.png \
-                          --pixel-size=15 \
-                          --ignore-cache
+poetry run gork export ./files/park.png \
+                       ./files/park_output.png \
+                       --pixel-size=15 \
+                       --ignore-cache
 ```
 
 | Original                             | Pixelated                                   |
