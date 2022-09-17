@@ -1,14 +1,15 @@
-import argparse
+"""GORK command line interface."""
+from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser, FileType
 
 from gork.image import GorkImage
-from gork.utils import DEFAULT_PIXEL_SIZE
 
 
 def run_cli() -> None:
-    parser = argparse.ArgumentParser(
+    """Run image generator for parameters."""
+    parser = ArgumentParser(
         prog="gork",
         description="Pixelate an image and recognize the objects.",
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+        formatter_class=ArgumentDefaultsHelpFormatter,
     )
     sub_parsers = parser.add_subparsers(
         dest="sub_cmd",
@@ -16,23 +17,34 @@ def run_cli() -> None:
         description="valid subcommands",
         help="additional help",
     )
-    sub_cmd_analyzer = add_sub_command(sub_parsers, "analyze")
+    sub_cmd_analyzer = sub_parsers.add_parser(
+        "analyze", formatter_class=ArgumentDefaultsHelpFormatter
+    )
     add_common_arguments(sub_cmd_analyzer)
     sub_cmd_analyzer.add_argument("--export")
 
-    sub_cmd_export = add_sub_command(sub_parsers, "export")
+    sub_cmd_export = sub_parsers.add_parser(
+        "export", formatter_class=ArgumentDefaultsHelpFormatter
+    )
     add_common_arguments(sub_cmd_export)
     sub_cmd_export.add_argument("destination")
     sub_cmd_export.add_argument(
         "--pixel-size",
         type=int,
-        default=DEFAULT_PIXEL_SIZE,
+        default=10,
         help="set width of the image as character length",
     )
 
-    sub_cmd_print = add_sub_command(sub_parsers, "print")
+    sub_cmd_print = sub_parsers.add_parser(
+        "print", formatter_class=ArgumentDefaultsHelpFormatter
+    )
     add_common_arguments(sub_cmd_print)
-    sub_cmd_print.add_argument("--width")
+    sub_cmd_print.add_argument(
+        "--width",
+        type=int,
+        required=True,
+        help="set width of the image as character length",
+    )
 
     args = parser.parse_args()
     if args.sub_cmd is None:
@@ -41,42 +53,46 @@ def run_cli() -> None:
 
     image = GorkImage(
         image_content=args.source.read(),
-        pixel_size=args.pixel_size,
-        save_results=True,
-        ignore_cache=args.ignore_cache,
+        # save_results=True,
+        # ignore_cache=args.ignore_cache,
     )
 
+    if hasattr(args, "width"):
+        image.pixel_size = image.src_width // args.width
+    else:
+        image.pixel_size = args.pixel_size
+
+    # SUBCOMMANDS
     if args.sub_cmd == "analyze":
-        print_report(image)
+        run_analyze(image)
 
     if args.sub_cmd == "export":
-        image.export(output=args.destination)
+        run_export(image, args.destination)
 
     if args.sub_cmd == "print":
-        print_image(image)
+        run_print(image)
 
 
-def add_sub_command(
-    sub_parsers: argparse.Action, cmd_name: str
-) -> argparse.ArgumentParser:
-    sub_command = sub_parsers.add_parser(
-        cmd_name, formatter_class=argparse.ArgumentDefaultsHelpFormatter
-    )
-    return sub_command
-
-
-def add_common_arguments(parser) -> None:
+def add_common_arguments(parser: ArgumentParser) -> None:
+    """Add common arguments for each sub commands."""
     parser.add_argument(
         "source",
-        type=argparse.FileType("rb"),
+        type=FileType("rb"),
         help="original image file path",
     )
     parser.add_argument("--ignore-cache")
 
 
-def print_report(image: GorkImage) -> None:
-    pass
+def run_analyze(_: GorkImage) -> None:
+    """Generate report about the pixelated image."""
+    print("not ready yet.")
 
 
-def print_image(image: GorkImage) -> None:
-    pass
+def run_export(image: GorkImage, destination: str) -> None:
+    """Save output as an image file."""
+    image.export(output=destination)
+
+
+def run_print(_: GorkImage) -> None:
+    """Print pixelated image to terminal."""
+    print("not ready yet.")

@@ -1,3 +1,4 @@
+"""GORK image module."""
 import collections
 import operator
 import typing
@@ -6,43 +7,59 @@ import cv2
 import numpy as np
 from sklearn.cluster import MiniBatchKMeans
 
-from gork.palette import COLORS, PALETTE
+from gork.palette import COLOR_TREE, COLORS, PALETTE
 from gork.structs import RGB, Color, ImageType, RGBType
-from gork.utils import DEFAULT_N_CLUSTERS, DEFAULT_PIXEL_SIZE, get_nearest_color
+
+DEFAULT_PIXEL_SIZE = 10
+DEFAULT_N_CLUSTERS = 256
 
 
-class GorkImage:
-    def __init__(
-        self,
-        image_content: bytes,
-        pixel_size: int = DEFAULT_PIXEL_SIZE,
-        save_results: bool = True,
-        ignore_cache: bool = False,
-    ) -> None:
-        # private
-        image_content = np.frombuffer(image_content, np.uint8)
-        self.__src_image = cv2.imdecode(image_content, cv2.IMREAD_COLOR)
-        self.__src_height, self.__src_width, _ = self.__src_image.shape
+def get_nearest_color(rgb: RGB) -> RGBType:
+    """Return nearest color for rgb value."""
+    result: int = COLOR_TREE.query(rgb.as_tuple)[1]
+    return PALETTE[result]
+
+
+class GorkImage:  # pylint: disable=too-many-instance-attributes
+    """Gork image processor."""
+
+    def __init__(self, image_content: bytes) -> None:
+        """Initialize a new processor to generate pixelated image."""
         self.__image = None
         self.__spectrum: typing.Dict[RGBType, int] = collections.defaultdict(int)
+        self.__src_image = cv2.imdecode(
+            np.frombuffer(image_content, np.uint8), cv2.IMREAD_COLOR
+        )
 
-        # public
-        self.pixel_size = pixel_size
+        # public attributes
+        self.src_height, self.src_width, _ = self.__src_image.shape
+        self.pixel_size = DEFAULT_PIXEL_SIZE
+
+    @property
+    def pixel_size(self) -> int:
+        """Return pixel size."""
+        return self.__pixel_size
+
+    @pixel_size.setter
+    def pixel_size(self, value: int) -> None:
+        """Set pixel size."""
+        self.__pixel_size = value
         self.n_clusters = DEFAULT_N_CLUSTERS
-        self.width = self.__src_width // self.pixel_size
-        self.height = int(self.width / self.__src_width * self.__src_height)
+        self.width = self.src_width // self.pixel_size
+        self.height = int(self.width / self.src_width * self.src_height)
 
     @property
     def image(self) -> ImageType:
+        """Return pixelated image."""
         if self.__image is None:
             colorspace = cv2.cvtColor(self.__src_image, cv2.COLOR_BGR2LAB)
             clt = MiniBatchKMeans(n_clusters=self.n_clusters)
             labels = clt.fit_predict(
-                colorspace.reshape((self.__src_width * self.__src_height, 3))
+                colorspace.reshape((self.src_width * self.src_height, 3))
             )
             quantized_colorspace = clt.cluster_centers_.astype(np.uint8)[
                 labels
-            ].reshape((self.__src_height, self.__src_width, 3))
+            ].reshape((self.src_height, self.src_width, 3))
             image = cv2.cvtColor(quantized_colorspace, cv2.COLOR_LAB2BGR)
             image = cv2.resize(
                 image,
@@ -57,7 +74,7 @@ class GorkImage:
 
             self.__image = cv2.resize(
                 image,
-                (self.__src_width, self.__src_height),
+                (self.src_width, self.src_height),
                 interpolation=cv2.INTER_NEAREST,
             )
 
@@ -65,6 +82,7 @@ class GorkImage:
 
     @property
     def spectrum(self) -> typing.List[typing.Tuple[Color, int]]:
+        """Return color list of the pixelated image."""
         spectrum = [
             (COLORS[PALETTE.index(rgb)], count)
             for rgb, count in sorted(
@@ -74,12 +92,14 @@ class GorkImage:
         return spectrum
 
     def get_color(self, pos_x: int, pos_y: int) -> np.ndarray:
+        """Return color of a position on the pixelated image."""
         return self.image[pos_y, pos_x]
 
     def export(self, output: str) -> None:
+        """Save image output."""
         image = cv2.resize(
             src=self.image,
-            dsize=(self.__src_width, self.__src_height),
+            dsize=(self.src_width, self.src_height),
             interpolation=cv2.INTER_NEAREST,
         )
         cv2.imwrite(output, image)
