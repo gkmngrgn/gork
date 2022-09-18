@@ -8,19 +8,16 @@ poetry run gork --help
 
 # colors, texts, recognitions, etc
 poetry run gork analyze --input=./files/park.png \
-                        --output=./files/park_report.txt \
-                        --ignore-cache
+                        --output=./files/park_report.txt
 
 # default width, terminal width scale it by height.
 poetry run gork print --width=80 \
-                      --input=./files/park.png \
-                      --ignore-cache
+                      --input=./files/park.png
 
 # default pixel size is 10.
 poetry run gork export ./files/park.png \
                        ./files/park_output.png \
-                       --pixel-size=15 \
-                       --ignore-cache
+                       --pixel-size=15
 ```
 
 | Original                             | Pixelated                                   |
