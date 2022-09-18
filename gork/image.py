@@ -1,7 +1,7 @@
 """GORK image module."""
 import collections
 import operator
-import typing
+from typing import Dict, List, Tuple
 
 import cv2
 import numpy as np
@@ -9,9 +9,6 @@ from sklearn.cluster import MiniBatchKMeans
 
 from gork.palette import COLOR_TREE, COLORS, PALETTE
 from gork.structs import RGB, Color, ImageType, RGBType
-
-DEFAULT_PIXEL_SIZE = 10
-DEFAULT_N_CLUSTERS = 256
 
 
 def get_nearest_color(rgb: RGB) -> RGBType:
@@ -23,65 +20,51 @@ def get_nearest_color(rgb: RGB) -> RGBType:
 class GorkImage:  # pylint: disable=too-many-instance-attributes
     """Gork image processor."""
 
-    def __init__(self, image_content: bytes) -> None:
+    def __init__(self, image_content: bytes, pixel_size: int) -> None:
         """Initialize a new processor to generate pixelated image."""
-        self.__image = None
-        self.__spectrum: typing.Dict[RGBType, int] = collections.defaultdict(int)
+        self.__spectrum: Dict[RGBType, int] = collections.defaultdict(int)
         self.__src_image = cv2.imdecode(
             np.frombuffer(image_content, np.uint8), cv2.IMREAD_COLOR
         )
 
         # public attributes
         self.src_height, self.src_width, _ = self.__src_image.shape
-        self.pixel_size = DEFAULT_PIXEL_SIZE
+        self.n_clusters = 256
+        self.dst_width = self.src_width // pixel_size
+        self.dst_height = int(self.dst_width / self.src_width * self.src_height)
+        self.image = self.__create_image()
+
+    def __create_image(self) -> ImageType:
+        colorspace = cv2.cvtColor(self.__src_image, cv2.COLOR_BGR2LAB)
+        clt = MiniBatchKMeans(n_clusters=self.n_clusters)
+        labels = clt.fit_predict(
+            colorspace.reshape((self.src_width * self.src_height, 3))
+        )
+        quantized_colorspace = clt.cluster_centers_.astype(np.uint8)[labels].reshape(
+            (self.src_height, self.src_width, 3)
+        )
+        image = cv2.cvtColor(quantized_colorspace, cv2.COLOR_LAB2BGR)
+        image = cv2.resize(
+            image,
+            (self.dst_width, self.dst_height),
+            interpolation=cv2.INTER_LINEAR,
+        )
+
+        for color in np.unique(image.reshape(-1, image.shape[2]), axis=0):
+            nearest_color = get_nearest_color(RGB(*color))
+            image[np.where((image == color).all(axis=2))] = nearest_color
+            self.__spectrum[nearest_color] += 1
+
+        # return cv2.resize(
+        #     image,
+        #     (self.src_width, self.src_height),
+        #     interpolation=cv2.INTER_NEAREST,
+        # )
+
+        return image
 
     @property
-    def pixel_size(self) -> int:
-        """Return pixel size."""
-        return self.__pixel_size
-
-    @pixel_size.setter
-    def pixel_size(self, value: int) -> None:
-        """Set pixel size."""
-        self.__pixel_size = value
-        self.n_clusters = DEFAULT_N_CLUSTERS
-        self.width = self.src_width // self.pixel_size
-        self.height = int(self.width / self.src_width * self.src_height)
-
-    @property
-    def image(self) -> ImageType:
-        """Return pixelated image."""
-        if self.__image is None:
-            colorspace = cv2.cvtColor(self.__src_image, cv2.COLOR_BGR2LAB)
-            clt = MiniBatchKMeans(n_clusters=self.n_clusters)
-            labels = clt.fit_predict(
-                colorspace.reshape((self.src_width * self.src_height, 3))
-            )
-            quantized_colorspace = clt.cluster_centers_.astype(np.uint8)[
-                labels
-            ].reshape((self.src_height, self.src_width, 3))
-            image = cv2.cvtColor(quantized_colorspace, cv2.COLOR_LAB2BGR)
-            image = cv2.resize(
-                image,
-                (self.width, self.height),
-                interpolation=cv2.INTER_LINEAR,
-            )
-
-            for color in np.unique(image.reshape(-1, image.shape[2]), axis=0):
-                nearest_color = get_nearest_color(RGB(*color))
-                image[np.where((image == color).all(axis=2))] = nearest_color
-                self.__spectrum[nearest_color] += 1
-
-            self.__image = cv2.resize(
-                image,
-                (self.src_width, self.src_height),
-                interpolation=cv2.INTER_NEAREST,
-            )
-
-        return self.__image
-
-    @property
-    def spectrum(self) -> typing.List[typing.Tuple[Color, int]]:
+    def spectrum(self) -> List[Tuple[Color, int]]:
         """Return color list of the pixelated image."""
         spectrum = [
             (COLORS[PALETTE.index(rgb)], count)
@@ -91,9 +74,11 @@ class GorkImage:  # pylint: disable=too-many-instance-attributes
         ]
         return spectrum
 
-    def get_color(self, pos_x: int, pos_y: int) -> np.ndarray:
+    def get_color(self, pos_x: int, pos_y: int) -> RGBType:
         """Return color of a position on the pixelated image."""
-        return self.image[pos_y, pos_x]
+        color = self.image[pos_y, pos_x]
+        rgb: RGBType = (color[0], color[1], color[2])
+        return rgb
 
     def export(self, output: str) -> None:
         """Save image output."""

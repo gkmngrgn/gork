@@ -20,7 +20,7 @@ pyinstaller = "^5.4.1"
 pylint = "^2.15.2"
 
 [tool.poetry.scripts]
-gork = "gork.cli:run_cli"
+gork = "app:main"
 
 [tool.poe.tasks.build]
 cmd = "bash scripts/build.sh"
