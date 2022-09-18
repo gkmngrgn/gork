@@ -35,7 +35,7 @@ class GorkImage:  # pylint: disable=too-many-instance-attributes
         self.image = self.__create_image()
 
     def __create_image(self) -> ImageType:
-        colorspace = cv2.cvtColor(self.__src_image, cv2.COLOR_BGR2LAB)
+        colorspace = cv2.cvtColor(self.__src_image, cv2.COLOR_RGB2LAB)
         clt = MiniBatchKMeans(n_clusters=self.n_clusters)
         labels = clt.fit_predict(
             colorspace.reshape((self.src_width * self.src_height, 3))
@@ -54,12 +54,6 @@ class GorkImage:  # pylint: disable=too-many-instance-attributes
             nearest_color = get_nearest_color(RGB(*color))
             image[np.where((image == color).all(axis=2))] = nearest_color
             self.__spectrum[nearest_color] += 1
-
-        # return cv2.resize(
-        #     image,
-        #     (self.src_width, self.src_height),
-        #     interpolation=cv2.INTER_NEAREST,
-        # )
 
         return image
 
@@ -87,4 +81,5 @@ class GorkImage:  # pylint: disable=too-many-instance-attributes
             dsize=(self.src_width, self.src_height),
             interpolation=cv2.INTER_NEAREST,
         )
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         cv2.imwrite(output, image)

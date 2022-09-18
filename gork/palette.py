@@ -261,6 +261,5 @@ COLORS = [
     Color("#3f1f3f", name="Grey89"),
     Color("#270f27", name="Grey93"),
 ]
-COLOR_COUNT = len(COLORS)
 PALETTE = [c.as_rgb.as_tuple for c in COLORS]
 COLOR_TREE = sp.KDTree(PALETTE)

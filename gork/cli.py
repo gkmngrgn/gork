@@ -2,31 +2,8 @@
 from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser, FileType, Namespace
 from pathlib import Path
 
+from gork.ansi_color import get_ansi_color_code
 from gork.image import GorkImage
-from gork.palette import PALETTE
-from gork.structs import RGBType
-
-
-def get_ansi_color_code(
-    top_color: RGBType, bottom_color: RGBType, repeat: int = 1
-) -> str:
-    """Get ansi color code to print preview in terminal."""
-
-    def ccode(rgb: RGBType) -> int:
-        return PALETTE.index(rgb)
-
-    code_block = [
-        "".join(
-            [
-                "\x1B[",
-                f"38;5;{ccode(top_color)};48;5;{ccode(bottom_color)}",
-                "m▀",
-                "\x1b[0m",
-            ]
-        )
-        for _ in range(repeat)
-    ]
-    return "".join(code_block)
 
 
 class CLI:
